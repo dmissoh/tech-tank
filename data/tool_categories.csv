@@ -1,0 +1,27 @@
+category_id,subcategory_id,category,subcategory,description,cluster
+academic-research,,Academic & Research,,"Tools for academic writing, research synthesis, and scientific document generation.",discovery
+agent-runtimes-frameworks,,Agent Runtimes & Frameworks,,"Tools for building, running, and managing AI agents.",agent-layer
+ai-coding-assistants-harnesses,,AI Coding Assistants & Harnesses,,"Tools for building deterministic, repeatable AI coding workflows.",agent-layer
+data-osint,,Data & OSINT,,Tools for open-source intelligence and real-time data aggregation.,platform-infra
+diagramming-architecture,,Diagramming & Architecture,,Tools for creating software architecture diagrams and visualizations.,platform-infra
+databases-vector-stores,,Databases & Vector Stores,,Specialized databases for AI applications and vector storage.,runtime-stack
+developer-tools-cli,,Developer Tools & CLI,,Command-line tools and utilities for developers.,platform-infra
+finance-trading,,Finance & Trading,,AI-powered financial tools and trading platforms.,domains
+legal-compliance,,Legal & Compliance,,AI tools and agent skills specialized for legal professionals and compliance workflows.,domains
+llm-apis-routing,,LLM APIs & Routing,,"Tools for managing, routing, and optimizing LLM API calls.",runtime-stack
+infrastructure-eventing,,Infrastructure & Eventing,,"Distributed messaging, event meshes, and backend infrastructure for AI systems.",runtime-stack
+model-context-protocol-mcp,,Model Context Protocol (MCP),,Servers and tools following the Model Context Protocol.,agent-layer
+memory-context-management,,Memory & Context Management,,Tools for managing AI memory and context across sessions.,agent-layer
+productivity-workflow,,Productivity & Workflow,,Tools for enhancing productivity and workflow automation.,platform-infra
+rag-knowledge-graphs,,RAG & Knowledge Graphs,,Tools for retrieval-augmented generation and knowledge graph management.,runtime-stack
+security-privacy-pentesting,,"Security, Privacy & Pentesting",,"AI-powered security tools, PII anonymization, and penetration testing frameworks.",platform-infra
+ui-ux-design-tools,,UI/UX & Design Tools,,"Tools for design, prototyping, and UI/UX workflows.",modalities
+voice-audio-ai,,Voice & Audio AI,,"Tools for voice synthesis, audio AI, and speech processing.",modalities
+video-media-generation,,Video & Media Generation,,Tools for AI-powered video generation and media creation.,modalities
+web-app-frameworks,,Web & App Frameworks,,Frameworks and platforms for building modern web applications and commerce.,platform-infra
+web-scraping-automation,,Web Scraping & Automation,,"Tools for web scraping, crawling, and browser automation.",platform-infra
+french-admin-finance-skills,,French Admin & Finance Skills,,"Collections de skills IA spécialisés dans la paperasse, comptabilité, fiscalité et gestion françaises.",domains
+developer-utilities,,Developer Utilities,,,platform-infra
+llm-training-education,,LLM Training & Education,,Tools related to llm training & education.,discovery
+obsidian-ecosystem,,Obsidian Ecosystem,,Tools related to obsidian ecosystem.,discovery
+data-open-data,,Data & Open Data,,Tools related to data & open data.,platform-infra

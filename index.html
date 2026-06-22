@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tech Tank — The architecture tooling landscape</title>
+<meta name="description" content="A ranked, filterable index of architecture and dev tooling — treemap and list views." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23c0492a'/%3E%3Ctext x='16' y='23' font-size='17' font-weight='700' font-family='monospace' fill='%23fff' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E" />
+<link rel="stylesheet" href="vendor/fonts.css" />
+<link rel="stylesheet" href="style.css" />
+<script>document.documentElement.dataset.theme = localStorage.getItem("theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");</script>
+</head>
+<body>
+<header class="site">
+  <div class="wrap bar">
+    <a class="logo" href="?"><span>[Tech&nbsp;Tank]</span><b>ARCH</b><i>beta</i></a>
+    <div class="views" role="tablist" aria-label="View">
+      <button id="vMap" class="view-btn" aria-pressed="true">▦ Map</button>
+      <button id="vList" class="view-btn" aria-pressed="false">≣ List</button>
+    </div>
+    <div class="src">
+      <button class="file-btn" id="theme" title="Toggle theme" aria-label="Toggle theme">🌙</button>
+      <label class="file-btn" title="Load your own CSV">Load CSV…
+        <input type="file" id="csvFile" accept=".csv,text/csv" hidden /></label>
+      <a class="file-btn" id="sourceLink" target="_blank" rel="noopener" hidden>data ↗</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow">An opinionated index</p>
+    <h1>The architecture tooling landscape, <em>indexed.</em></h1>
+    <p class="lede">An index of architecture and dev tools sorted into categories, mixing public signals with
+      editorial judgment on what's worth a closer look. Numbers are signals, not the final word.</p>
+    <div class="stats" id="stats"></div>
+  </div>
+</section>
+
+<section class="controls">
+  <div class="wrap">
+    <input type="search" id="q" placeholder="Search tools, descriptions…" autocomplete="off" />
+    <select id="cluster"><option value="">All clusters</option></select>
+    <select id="category"><option value="">All categories</option></select>
+    <select id="maturity"><option value="">Any maturity</option></select>
+    <select id="pricing"><option value="">Any pricing</option></select>
+    <select id="offering"><option value="">Any offering</option></select>
+    <label class="chk"><input type="checkbox" id="oss" /> Open source</label>
+    <label class="chk"><input type="checkbox" id="selfhost" /> Self-hostable</label>
+    <select id="sort" class="list-only" hidden>
+      <option value="score">Sort: Stars</option>
+      <option value="name">Sort: Name</option>
+      <option value="released">Sort: Released</option>
+      <option value="updated">Sort: Updated</option>
+    </select>
+    <label class="chk list-only" id="groupWrap" hidden><input type="checkbox" id="group" checked /> Group</label>
+    <span class="count" id="count"></span>
+  </div>
+</section>
+
+<main class="wrap">
+  <div class="layout">
+    <div id="view" class="view"><p class="loading" id="status">loading landscape index…</p></div>
+    <aside class="landed" id="landed" hidden>
+      <div class="landed-head">
+        <h3>✦ Just landed</h3>
+        <div class="seg" role="tablist" aria-label="Sort recent by">
+          <button id="lRel" class="seg-btn" aria-pressed="true">released</button>
+          <button id="lUpd" class="seg-btn" aria-pressed="false">updated</button>
+        </div>
+      </div>
+      <div class="landed-list" id="landedList"></div>
+      <button class="landed-more" id="landedMore"></button>
+    </aside>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p>Data extracted from the <a href="https://yawo.github.io/architools/tooling/tools.html" target="_blank" rel="noopener">Architools tooling wiki</a>;
+       design is a replica of <a href="https://devindex.ai" target="_blank" rel="noopener">devindex.ai</a>.
+       Score = live GitHub stargazer count (log-scaled for sizing); tools without a public repo show no stars.
+       Bring your own data: <code>?data=URL.csv</code> or <strong>Load CSV…</strong>.</p>
+  </div>
+</footer>
+
+<!-- detail panel -->
+<div id="overlay" class="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+    <div class="sheet-bar">
+      <nav class="crumb" id="dCrumb"></nav>
+      <button class="close" id="dClose" aria-label="Close">✕ esc</button>
+    </div>
+    <div class="sheet-body" id="dBody"></div>
+  </div>
+</div>
+
+<script src="vendor/d3-hierarchy.min.js" defer></script>
+<script src="vendor/papaparse.min.js" defer></script>
+<script src="app.js" defer></script>
+</body>
+</html>
