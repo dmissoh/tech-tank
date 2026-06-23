@@ -92,7 +92,7 @@ static host. All paths are relative, so it also works from a sub-path.
 
 ### Live
 
-Hosted on **Vercel** (project `v2`): <https://v2-six-hazel.vercel.app>
+Hosted on **Vercel** (project `tech-tank`): <https://tech-tank.vercel.app>
 
 One-off manual deploy from this folder (needs `vercel login` once):
 
