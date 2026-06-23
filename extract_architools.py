@@ -8,7 +8,7 @@ Usage:  python3 extract_architools.py            # fetch live + write data/*.csv
 `score` = real GitHub stargazer count (fetched via the `gh` CLI token). Tools
 without a GitHub repo get score 0. Re-run anytime to refresh stars.
 """
-import csv, html, json, re, subprocess, sys, urllib.request, urllib.error
+import csv, html, json, os, re, subprocess, sys, urllib.request, urllib.error
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urljoin
 
@@ -48,6 +48,9 @@ def slug(s):
     return re.sub(r"^-|-$", "", re.sub(r"[^a-z0-9]+", "-", s.lower()))
 
 def gh_token():
+    env = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")  # CI provides this
+    if env:
+        return env
     try:
         return subprocess.run(["gh", "auth", "token"], capture_output=True, text=True, check=True).stdout.strip()
     except Exception:

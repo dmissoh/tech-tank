@@ -1,0 +1,54 @@
+name: Refresh data & deploy
+
+on:
+  # ~every 3 days at 06:00 UTC. (cron */3 fires on days 1,4,7,…,28,31; the day-31→
+  # next-month-1 gap is shorter — good enough for a 3-day data refresh.)
+  schedule:
+    - cron: "0 6 */3 * *"
+  workflow_dispatch: {}        # lets you run it manually from the Actions tab / gh CLI
+
+permissions:
+  contents: write              # commit the refreshed CSVs back to main
+
+concurrency:
+  group: refresh-deploy
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Rebuild index from the Architools wiki (stars via GitHub API)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # 1000 req/h, enough for ~210 repos
+        run: python3 extract_architools.py
+
+      - name: Validate CSV schema
+        run: node test.mjs
+
+      - name: Commit refreshed data
+        run: |
+          git config user.name "tech-tank-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain data)" ]; then
+            git add data
+            git commit -m "data: scheduled Architools refresh"
+            git push
+          else
+            echo "No data changes — skipping commit."
+          fi
+
+      - name: Deploy to Vercel (production)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          npm i -g vercel@latest
+          vercel deploy --prod --yes --token="$VERCEL_TOKEN"
