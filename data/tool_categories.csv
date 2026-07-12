@@ -25,3 +25,147 @@ developer-utilities,,Developer Utilities,,,platform-infra
 llm-training-education,,LLM Training & Education,,Tools related to llm training & education.,discovery
 obsidian-ecosystem,,Obsidian Ecosystem,,Tools related to obsidian ecosystem.,discovery
 data-open-data,,Data & Open Data,,Tools related to data & open data.,platform-infra
+ai-coding-assistants-harnesses,,AI Coding Assistants & Harnesses,Blog,,agent-layer
+ai-coding-assistants-harnesses,,AI Coding Assistants & Harnesses,Go,,agent-layer
+ai-coding-assistants-harnesses,,AI Coding Assistants & Harnesses,HTML,,agent-layer
+ai-coding-assistants-harnesses,,AI Coding Assistants & Harnesses,JavaScript,,agent-layer
+ai-coding-assistants-harnesses,,AI Coding Assistants & Harnesses,Markdown,,agent-layer
+ai-coding-assistants-harnesses,,AI Coding Assistants & Harnesses,Python,,agent-layer
+ai-coding-assistants-harnesses,,AI Coding Assistants & Harnesses,Rust,,agent-layer
+ai-coding-assistants-harnesses,,AI Coding Assistants & Harnesses,SaaS,,agent-layer
+ai-coding-assistants-harnesses,,AI Coding Assistants & Harnesses,Shell,,agent-layer
+ai-coding-assistants-harnesses,,AI Coding Assistants & Harnesses,TypeScript,,agent-layer
+ai-coding-assistants-harnesses,,AI Coding Assistants & Harnesses,Various,,agent-layer
+ai-coding-assistants-harnesses,,AI Coding Assistants & Harnesses,Zero,,agent-layer
+academic-research,,Academic & Research,Markdown,,discovery
+academic-research,,Academic & Research,Python,,discovery
+academic-research,,Academic & Research,SaaS,,discovery
+academic-research,,Academic & Research,Various,,discovery
+agent-runtimes-frameworks,,Agent Runtimes & Frameworks,Blog,,agent-layer
+agent-runtimes-frameworks,,Agent Runtimes & Frameworks,Elixir,,agent-layer
+agent-runtimes-frameworks,,Agent Runtimes & Frameworks,Go,,agent-layer
+agent-runtimes-frameworks,,Agent Runtimes & Frameworks,HTML,,agent-layer
+agent-runtimes-frameworks,,Agent Runtimes & Frameworks,JavaScript,,agent-layer
+agent-runtimes-frameworks,,Agent Runtimes & Frameworks,Markdown,,agent-layer
+agent-runtimes-frameworks,,Agent Runtimes & Frameworks,Python,,agent-layer
+agent-runtimes-frameworks,,Agent Runtimes & Frameworks,Rust,,agent-layer
+agent-runtimes-frameworks,,Agent Runtimes & Frameworks,SaaS,,agent-layer
+agent-runtimes-frameworks,,Agent Runtimes & Frameworks,TypeScript,,agent-layer
+agent-runtimes-frameworks,,Agent Runtimes & Frameworks,Various,,agent-layer
+data-osint,,Data & OSINT,Java,,platform-infra
+data-osint,,Data & OSINT,JavaScript,,platform-infra
+data-osint,,Data & OSINT,Python,,platform-infra
+data-osint,,Data & OSINT,TypeScript,,platform-infra
+data-osint,,Data & OSINT,Various,,platform-infra
+data-open-data,,Data & Open Data,SaaS,,platform-infra
+data-open-data,,Data & Open Data,Various,,platform-infra
+databases-vector-stores,,Databases & Vector Stores,Go,,runtime-stack
+databases-vector-stores,,Databases & Vector Stores,Rust,,runtime-stack
+databases-vector-stores,,Databases & Vector Stores,SaaS,,runtime-stack
+developer-tools-cli,,Developer Tools & CLI,BAML,,platform-infra
+developer-tools-cli,,Developer Tools & CLI,C,,platform-infra
+developer-tools-cli,,Developer Tools & CLI,Go,,platform-infra
+developer-tools-cli,,Developer Tools & CLI,Java,,platform-infra
+developer-tools-cli,,Developer Tools & CLI,JavaScript,,platform-infra
+developer-tools-cli,,Developer Tools & CLI,Node,,platform-infra
+developer-tools-cli,,Developer Tools & CLI,PowerShell,,platform-infra
+developer-tools-cli,,Developer Tools & CLI,Python,,platform-infra
+developer-tools-cli,,Developer Tools & CLI,Rust,,platform-infra
+developer-tools-cli,,Developer Tools & CLI,SaaS,,platform-infra
+developer-tools-cli,,Developer Tools & CLI,Shell,,platform-infra
+developer-tools-cli,,Developer Tools & CLI,Swift,,platform-infra
+developer-tools-cli,,Developer Tools & CLI,TypeScript,,platform-infra
+developer-tools-cli,,Developer Tools & CLI,TypeScript/Python,,platform-infra
+developer-tools-cli,,Developer Tools & CLI,Various,,platform-infra
+developer-utilities,,Developer Utilities,1.1k,,platform-infra
+developer-utilities,,Developer Utilities,Go,,platform-infra
+developer-utilities,,Developer Utilities,JavaScript,,platform-infra
+developer-utilities,,Developer Utilities,Markdown,,platform-infra
+developer-utilities,,Developer Utilities,Python,,platform-infra
+developer-utilities,,Developer Utilities,Rust,,platform-infra
+developer-utilities,,Developer Utilities,SaaS,,platform-infra
+diagramming-architecture,,Diagramming & Architecture,Go,,platform-infra
+diagramming-architecture,,Diagramming & Architecture,Java,,platform-infra
+diagramming-architecture,,Diagramming & Architecture,JavaScript,,platform-infra
+diagramming-architecture,,Diagramming & Architecture,Markdown,,platform-infra
+diagramming-architecture,,Diagramming & Architecture,TypeScript,,platform-infra
+diagramming-architecture,,Diagramming & Architecture,Various,,platform-infra
+finance-trading,,Finance & Trading,Python,,domains
+finance-trading,,Finance & Trading,SaaS,,domains
+french-admin-finance-skills,,French Admin & Finance Skills,Markdown,,domains
+infrastructure-eventing,,Infrastructure & Eventing,Java,,runtime-stack
+infrastructure-eventing,,Infrastructure & Eventing,Python,,runtime-stack
+infrastructure-eventing,,Infrastructure & Eventing,SaaS,,runtime-stack
+infrastructure-eventing,,Infrastructure & Eventing,Shell,,runtime-stack
+infrastructure-eventing,,Infrastructure & Eventing,TypeScript,,runtime-stack
+llm-apis-routing,,LLM APIs & Routing,C,,runtime-stack
+llm-apis-routing,,LLM APIs & Routing,Go,,runtime-stack
+llm-apis-routing,,LLM APIs & Routing,Markdown,,runtime-stack
+llm-apis-routing,,LLM APIs & Routing,Python,,runtime-stack
+llm-apis-routing,,LLM APIs & Routing,Rust,,runtime-stack
+llm-apis-routing,,LLM APIs & Routing,SaaS,,runtime-stack
+llm-apis-routing,,LLM APIs & Routing,Spec,,runtime-stack
+llm-apis-routing,,LLM APIs & Routing,Swift,,runtime-stack
+llm-apis-routing,,LLM APIs & Routing,TypeScript,,runtime-stack
+llm-training-education,,LLM Training & Education,Markdown,,discovery
+llm-training-education,,LLM Training & Education,Python,,discovery
+legal-compliance,,Legal & Compliance,Python,,domains
+legal-compliance,,Legal & Compliance,Rust,,domains
+legal-compliance,,Legal & Compliance,TypeScript,,domains
+memory-context-management,,Memory & Context Management,C++/Python,,agent-layer
+memory-context-management,,Memory & Context Management,Go,,agent-layer
+memory-context-management,,Memory & Context Management,Python,,agent-layer
+memory-context-management,,Memory & Context Management,Python/Rust,,agent-layer
+memory-context-management,,Memory & Context Management,Rust,,agent-layer
+memory-context-management,,Memory & Context Management,TypeScript,,agent-layer
+memory-context-management,,Memory & Context Management,Various,,agent-layer
+model-context-protocol-mcp,,Model Context Protocol (MCP),C,,agent-layer
+model-context-protocol-mcp,,Model Context Protocol (MCP),Node,,agent-layer
+model-context-protocol-mcp,,Model Context Protocol (MCP),Python,,agent-layer
+model-context-protocol-mcp,,Model Context Protocol (MCP),Rust,,agent-layer
+model-context-protocol-mcp,,Model Context Protocol (MCP),TypeScript,,agent-layer
+model-context-protocol-mcp,,Model Context Protocol (MCP),Various,,agent-layer
+obsidian-ecosystem,,Obsidian Ecosystem,Python/Shell,,discovery
+obsidian-ecosystem,,Obsidian Ecosystem,TypeScript,,discovery
+obsidian-ecosystem,,Obsidian Ecosystem,Various,,discovery
+productivity-workflow,,Productivity & Workflow,Markdown,,platform-infra
+productivity-workflow,,Productivity & Workflow,Python/JS,,platform-infra
+productivity-workflow,,Productivity & Workflow,TypeScript,,platform-infra
+productivity-workflow,,Productivity & Workflow,Various,,platform-infra
+productivity-workflow,,Productivity & Workflow,Web,,platform-infra
+rag-knowledge-graphs,,RAG & Knowledge Graphs,JavaScript,,runtime-stack
+rag-knowledge-graphs,,RAG & Knowledge Graphs,Markdown,,runtime-stack
+rag-knowledge-graphs,,RAG & Knowledge Graphs,Python,,runtime-stack
+rag-knowledge-graphs,,RAG & Knowledge Graphs,Rust,,runtime-stack
+rag-knowledge-graphs,,RAG & Knowledge Graphs,TypeScript,,runtime-stack
+rag-knowledge-graphs,,RAG & Knowledge Graphs,Various,,runtime-stack
+security-privacy-pentesting,,"Security, Privacy & Pentesting",Go,,platform-infra
+security-privacy-pentesting,,"Security, Privacy & Pentesting",Markdown,,platform-infra
+security-privacy-pentesting,,"Security, Privacy & Pentesting",Python,,platform-infra
+security-privacy-pentesting,,"Security, Privacy & Pentesting",Rust,,platform-infra
+security-privacy-pentesting,,"Security, Privacy & Pentesting",SaaS,,platform-infra
+security-privacy-pentesting,,"Security, Privacy & Pentesting",TypeScript,,platform-infra
+security-privacy-pentesting,,"Security, Privacy & Pentesting",Various,,platform-infra
+ui-ux-design-tools,,UI/UX & Design Tools,CSS,,modalities
+ui-ux-design-tools,,UI/UX & Design Tools,Markdown,,modalities
+ui-ux-design-tools,,UI/UX & Design Tools,Python,,modalities
+ui-ux-design-tools,,UI/UX & Design Tools,SaaS,,modalities
+ui-ux-design-tools,,UI/UX & Design Tools,TypeScript,,modalities
+ui-ux-design-tools,,UI/UX & Design Tools,Various,,modalities
+ui-ux-design-tools,,UI/UX & Design Tools,Web,,modalities
+video-media-generation,,Video & Media Generation,Python,,modalities
+video-media-generation,,Video & Media Generation,TypeScript,,modalities
+video-media-generation,,Video & Media Generation,Various,,modalities
+voice-audio-ai,,Voice & Audio AI,Python,,modalities
+voice-audio-ai,,Voice & Audio AI,Python/TypeScript,,modalities
+voice-audio-ai,,Voice & Audio AI,Rust,,modalities
+voice-audio-ai,,Voice & Audio AI,SaaS,,modalities
+web-app-frameworks,,Web & App Frameworks,Ruby,,platform-infra
+web-app-frameworks,,Web & App Frameworks,SaaS,,platform-infra
+web-app-frameworks,,Web & App Frameworks,TypeScript,,platform-infra
+web-scraping-automation,,Web Scraping & Automation,Go,,platform-infra
+web-scraping-automation,,Web Scraping & Automation,JavaScript,,platform-infra
+web-scraping-automation,,Web Scraping & Automation,Python,,platform-infra
+web-scraping-automation,,Web Scraping & Automation,Rust,,platform-infra
+web-scraping-automation,,Web Scraping & Automation,TypeScript,,platform-infra
+web-scraping-automation,,Web Scraping & Automation,Various,,platform-infra
