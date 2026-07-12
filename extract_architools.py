@@ -60,6 +60,29 @@ def repo_path(github_url):  # owner/repo from a github URL (first two path segme
     m = re.search(r"github\.com/([^/]+)/([^/#?]+)", github_url)
     return f"{m.group(1)}/{m.group(2).removesuffix('.git')}" if m else None
 
+def resolve_wiki_links(tools):
+    """For tools whose link points to the architools wiki instead of a real repo,
+    scrape the individual wiki page to extract the actual GitHub URL."""
+    wiki_tools = [t for t in tools if not t["github_url"] and "yawo.github.io/architools" in t["link"]]
+    if not wiki_tools:
+        return
+    print(f"resolving {len(wiki_tools)} wiki-only links via individual pages...", file=sys.stderr)
+
+    def fetch_one(t):
+        try:
+            page = urllib.request.urlopen(t["link"], timeout=15).read().decode("utf-8", errors="ignore")
+            gh_links = re.findall(r'href="([^"]*github\.com/[^/]+/[^"#?]+)', page)
+            real = [l for l in gh_links if "yawo/architools" not in l]
+            if real:
+                t["github_url"] = real[0]
+        except Exception as e:
+            print(f"  {t['name']}: {e}", file=sys.stderr)
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        list(pool.map(fetch_one, wiki_tools))
+    resolved = sum(1 for t in wiki_tools if t["github_url"])
+    print(f"resolved {resolved}/{len(wiki_tools)} wiki links to real GitHub repos", file=sys.stderr)
+
 def fetch_stars(tools):
     token = gh_token()
     if not token:
@@ -138,6 +161,7 @@ def main():
     doc = open(sys.argv[1], encoding="utf-8").read() if len(sys.argv) > 1 else \
         urllib.request.urlopen(BASE).read().decode("utf-8")
     tools, cats = parse(doc)
+    resolve_wiki_links(tools)
     fetch_stars(tools)
     rank(tools)
     cols = ["name","tool_id","category","subcategory","description","link","github_url","offering",
