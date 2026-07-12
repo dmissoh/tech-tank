@@ -37,7 +37,7 @@
 /* ---- center label ---- */
 .center-label {
   position: absolute;
-  top: 10%; left: 40%;
+  top: 10%; left: 80%;
   transform: translate(-50%, -50%);
   text-align: center;
   pointer-events: none;
@@ -59,7 +59,7 @@
 .center-label.has-detail .center-sub { display: block; color: var(--accent); }
 
 .back-btn {
-  position: absolute; top: 10%; left: 30%; z-index: 10;
+  position: absolute; top: 70%; left: 30%; z-index: 10;
   background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
   padding: 8px 14px; cursor: pointer; font: 12px var(--mono);
   color: var(--ink); display: none; align-items: center; gap: 6px;
