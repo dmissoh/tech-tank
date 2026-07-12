@@ -14,6 +14,7 @@ let TOOLS = [], CATS = [];
 let allArcs = [];
 let svgEl, gEl, root, radius;
 let currentZoom = null; // track zoom state
+let zoomStack = []; // history for step-back navigation
 
 // ---- helpers ----
 const num = (t) => { const n = Number(t.score); return Number.isFinite(n) ? n : 0; };
@@ -54,8 +55,12 @@ function clusterColor(cluster, depth) {
   const isDark = document.documentElement.dataset.theme === "dark";
   const pal = CLUSTER_COLORS[cluster] || CLUSTER_COLORS["other"];
   const base = isDark ? pal.dark : pal.light;
-  if (depth === 1) return base;
-  return base.replace(/oklch\(([\d.]+)/, (_, l) => `oklch(${Math.min(0.92, Number(l) + 0.08 * depth)})`);
+  // Lighten for outer rings: parse the oklch lightness and bump it
+  if (depth <= 0) return base;
+  const m = base.match(/oklch\(([\d.]+)\s+([\d.]+)\s+([\d.]+)\)/);
+  if (!m) return base;
+  const l = Math.min(0.92, Number(m[1]) + 0.08 * depth);
+  return "oklch(" + l + " " + m[2] + " " + m[3] + ")";
 }
 
 // ---- CSV ----
@@ -98,7 +103,7 @@ function buildHierarchy(tools) {
 function arcPath(x0, x1, y0, y1, padAngle) {
   const r0 = Math.max(0, y0);
   const r1 = Math.max(0, y1 - 1);
-  if (r1 <= 0 || x1 <= x0) return "";
+  if (!(r1 > 0) || !(x1 > x0) || isNaN(x0) || isNaN(x1) || isNaN(y0) || isNaN(y1)) return "";
   const a0 = x0 + padAngle;
   const a1 = x1 - padAngle;
   const sa = Math.sin(a0), ca = Math.cos(a0);
@@ -118,15 +123,82 @@ function lerp(a, b, t) { return a + (b - a) * t; }
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
 // ---- animate helper ----
+let zoomAnimId = null;
+
 function animate(duration, onFrame) {
+  // Cancel any ongoing zoom animation
+  if (zoomAnimId) {
+    cancelAnimationFrame(zoomAnimId);
+    zoomAnimId = null;
+  }
   const start = performance.now();
   function tick(now) {
     const t = clamp((now - start) / duration, 0, 1);
     const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; // easeInOutQuad
     onFrame(eased, t >= 1);
-    if (t < 1) requestAnimationFrame(tick);
+    if (t < 1) {
+      zoomAnimId = requestAnimationFrame(tick);
+    } else {
+      zoomAnimId = null;
+    }
   }
-  requestAnimationFrame(tick);
+  zoomAnimId = requestAnimationFrame(tick);
+}
+
+// ---- drag-to-rotate ----
+let wheelAngle = 0;
+let dragStart = null;
+let dragVelocity = 0;
+let momentumRaf = null;
+
+function angleFromCenter(clientX, clientY) {
+  const rect = svgEl.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  return Math.atan2(clientY - cy, clientX - cx);
+}
+
+function applyWheelRotation() {
+  gEl.setAttribute("transform", "translate(" + radius + "," + radius + ") rotate(" + (wheelAngle * 180 / Math.PI) + ")");
+}
+
+function onDragStart(clientX, clientY) {
+  cancelMomentum();
+  dragStart = angleFromCenter(clientX, clientY);
+  dragVelocity = 0;
+}
+
+function onDragMove(clientX, clientY) {
+  if (dragStart === null) return;
+  const current = angleFromCenter(clientX, clientY);
+  let delta = current - dragStart;
+  // Normalize delta to [-π, π] to avoid jumps at ±π boundary
+  if (delta > Math.PI) delta -= 2 * Math.PI;
+  if (delta < -Math.PI) delta += 2 * Math.PI;
+  dragVelocity = delta;
+  wheelAngle += delta;
+  dragStart = current;
+  applyWheelRotation();
+}
+
+function onDragEnd() {
+  dragStart = null;
+  // Start momentum
+  if (Math.abs(dragVelocity) > 0.001) {
+    let v = dragVelocity * 0.6; // dampen
+    function tick() {
+      v *= 0.95; // friction
+      if (Math.abs(v) < 0.0002) return;
+      wheelAngle += v;
+      applyWheelRotation();
+      momentumRaf = requestAnimationFrame(tick);
+    }
+    momentumRaf = requestAnimationFrame(tick);
+  }
+}
+
+function cancelMomentum() {
+  if (momentumRaf) { cancelAnimationFrame(momentumRaf); momentumRaf = null; }
 }
 
 // ---- sunburst render ----
@@ -144,7 +216,16 @@ function renderSunburst(tools) {
   svgEl.setAttribute("width", size);
   svgEl.setAttribute("height", size);
   svgEl.style.display = "block";
+  svgEl.style.cursor = "grab";
   container.appendChild(svgEl);
+
+  // Drag-to-rotate
+  svgEl.addEventListener("mousedown", (e) => { e.preventDefault(); onDragStart(e.clientX, e.clientY); });
+  svgEl.addEventListener("touchstart", (e) => { if (e.touches.length === 1) { e.preventDefault(); onDragStart(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: false });
+  window.addEventListener("mousemove", (e) => onDragMove(e.clientX, e.clientY));
+  window.addEventListener("touchmove", (e) => { if (e.touches.length === 1) onDragMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+  window.addEventListener("mouseup", onDragEnd);
+  window.addEventListener("touchend", onDragEnd);
 
   gEl = document.createElementNS(SVG_NS, "g");
   gEl.setAttribute("transform", `translate(${radius},${radius})`);
@@ -158,7 +239,9 @@ function renderSunburst(tools) {
   d3.partition().size([2 * Math.PI, radius])(root);
 
   currentZoom = root;
+  zoomStack = [];
   allArcs = [];
+  wheelAngle = 0;
 
   // Render arcs
   const descendants = root.descendants().filter((d) => d.depth > 0);
@@ -167,7 +250,7 @@ function renderSunburst(tools) {
     const cl = d.data.cluster || (d.depth === 1 ? d.data.cluster : d.parent?.data?.cluster) || "other";
     const padAngle = d.depth === 3 ? 0.002 : 0.005;
     path.setAttribute("d", arcPath(d.x0, d.x1, d.y0, d.y1, padAngle));
-    path.setAttribute("fill", clusterColor(cl, d.depth));
+    path.setAttribute("fill", clusterColor(cl, d.depth - currentZoom.depth));
     path.setAttribute("class", "sunburst-arc");
     path.setAttribute("data-cluster", cl);
     path.dataset.nodeId = d.data.name;
@@ -178,34 +261,80 @@ function renderSunburst(tools) {
     path.addEventListener("click", () => onClickArc(d));
 
     gEl.appendChild(path);
-    allArcs.push({ data: d, el: path });
+    d._el = path; // store reference for zoom animation
+
+    // Per-arc overview label (depth >= 2; depth-1 clusters use the styled cluster-label).
+    // Tiny font, truncated to fit the wedge, so the wheel reads as an overview.
+    let label = null;
+    if (d.depth >= 2) {
+      const midAngle = (d.x0 + d.x1) / 2;
+      const midR = (d.y0 + d.y1) / 2;
+      const lx = Math.sin(midAngle) * midR;
+      const ly = -Math.cos(midAngle) * midR;
+      const bandW = d.y1 - d.y0;
+      const arcLen = midR * (d.x1 - d.x0);
+      const fontSize = d.depth === 3 ? 5 : 6;
+      const charW = fontSize * 0.62;
+      const maxChars = Math.max(2, Math.floor(arcLen / charW) - 1);
+      let labelText = d.data.name;
+      if (labelText.length > maxChars) labelText = labelText.slice(0, Math.max(1, maxChars - 1)) + "…";
+      const deg = midAngle * 180 / Math.PI;
+      const flip = deg > 90 && deg < 270;
+      label = document.createElementNS(SVG_NS, "text");
+      label.setAttribute("x", lx);
+      label.setAttribute("y", ly);
+      label.setAttribute("transform", `rotate(${flip ? deg + 180 : deg} ${lx} ${ly})`);
+      label.setAttribute("text-anchor", "middle");
+      label.setAttribute("dominant-baseline", "central");
+      label.setAttribute("fill", "#fff");
+      label.setAttribute("paint-order", "stroke");
+      label.setAttribute("stroke", "rgba(0,0,0,0.5)");
+      label.setAttribute("stroke-width", "1.6px");
+      label.setAttribute("stroke-linejoin", "round");
+      label.setAttribute("font-size", fontSize + "px");
+      label.setAttribute("font-family", "var(--mono)");
+      label.setAttribute("letter-spacing", "0.03em");
+      label.setAttribute("pointer-events", "none");
+      label.setAttribute("class", "arc-label");
+      label.dataset.full = d.data.name;
+      label.textContent = labelText;
+      // Show only when the wedge is wide/tall enough to hold a few glyphs
+      label.style.opacity = (arcLen > fontSize * 1.15 && bandW > 6) ? "1" : "0";
+      gEl.appendChild(label);
+    }
+
+    allArcs.push({ data: d, el: path, label });
   }
 
-  // Cluster labels (ring 1)
+  // Cluster labels (ring 1) — white with shadow for contrast on any arc color
   const clusters = root.descendants().filter((d) => d.depth === 1);
-  const isDark = document.documentElement.dataset.theme === "dark";
-  const labelColor = isDark ? "oklch(0.93 0.01 85)" : "oklch(0.20 0.01 60)";
 
   for (const d of clusters) {
     const angle = (d.x0 + d.x1) / 2;
     const r = (d.y0 + d.y1) / 2;
     const arcSpan = d.x1 - d.x0;
     const bandW = d.y1 - d.y0;
-    if (arcSpan < 0.25 || bandW < 30) continue;
+    if (arcSpan < 0.12 || bandW < 16) continue;
 
     const text = document.createElementNS(SVG_NS, "text");
     const x = Math.sin(angle) * r;
     const y = -Math.cos(angle) * r;
     const deg = angle * 180 / Math.PI;
     const flip = deg > 90 && deg < 270;
-    text.setAttribute("transform", `translate(${x},${y}) rotate(${flip ? deg + 180 : deg})`);
+    text.setAttribute("transform", "translate(" + x + "," + y + ") rotate(" + (flip ? deg + 180 : deg) + ")");
     text.setAttribute("text-anchor", "middle");
     text.setAttribute("dominant-baseline", "central");
-    text.setAttribute("fill", labelColor);
-    text.setAttribute("font-size", "9px");
+    text.setAttribute("fill", "#fff");
+    text.setAttribute("paint-order", "stroke");
+    text.setAttribute("stroke", "rgba(0,0,0,0.45)");
+    text.setAttribute("stroke-width", "2px");
+    text.setAttribute("stroke-linejoin", "round");
+    text.setAttribute("font-size", "7px");
     text.setAttribute("font-family", "var(--mono)");
     text.setAttribute("letter-spacing", "0.08em");
     text.setAttribute("pointer-events", "none");
+    text.setAttribute("class", "cluster-label");
+    text.dataset.clusterName = d.data.cluster;
     text.textContent = d.data.name.toUpperCase();
     gEl.appendChild(text);
   }
@@ -268,72 +397,164 @@ function onLeave() { tooltip.hidden = true; }
 
 function onClickArc(d) {
   if (d.data.tool) { showDetail(d.data.tool); return; }
+  zoomStack.push(currentZoom);
   zoomTo(d);
+}
+
+function zoomBack() {
+  const prev = zoomStack.length ? zoomStack.pop() : root;
+  zoomTo(prev);
 }
 
 // ---- zoom (animated arc paths) ----
 function zoomTo(target) {
-  // Save original positions before zoom
+  // Save original positions before first zoom (for initial reference)
   root.each((d) => {
     if (d._ox0 === undefined) { d._ox0 = d.x0; d._ox1 = d.x1; d._oy0 = d.y0; d._oy1 = d.y1; }
   });
 
-  // Compute target positions
-  const xDomain = [target._ox0, target._ox1];
-  const yDomain = [target._oy0, root._oy1];
-  const yMin = target.depth ? 60 : 0;
-  const yMax = root._oy1 - (target.depth ? 60 : 0);
-
-  const newX0 = [], newX1 = [], newY0 = [], newY1 = [];
-  const paths = gEl.querySelectorAll("path");
-  const nodes = [];
-  for (const path of paths) {
-    const d = allArcs.find((a) => a.el === path)?.data;
-    if (!d) continue;
-    nodes.push(d);
-
-    // Map current (original) angles into target's [0, 2π] range
-    const tx0 = clamp((d._ox0 - xDomain[0]) / (xDomain[1] - xDomain[0]) * 2 * Math.PI, 0, 2 * Math.PI);
-    const tx1 = clamp((d._ox1 - xDomain[0]) / (xDomain[1] - xDomain[0]) * 2 * Math.PI, 0, 2 * Math.PI);
-    const ty0 = lerp(yMin, yMax, (d._oy0 - yDomain[0]) / (yDomain[1] - yDomain[0]));
-    const ty1 = lerp(yMin, yMax, (d._oy1 - yDomain[0]) / (yDomain[1] - yDomain[0]));
-    newX0.push(tx0); newX1.push(tx1); newY0.push(ty0); newY1.push(ty1);
+  // Save current positions as pre-zoom state for correct interpolation
+  for (const { data: d } of allArcs) {
+    d._pz0 = d.x0; d._pz1 = d.x1; d._py0 = d.y0; d._py1 = d.y1;
   }
 
-  // Animate
+  // Compute target positions.
+  // NOTE: the radial maximum is the partition's outer radius, NOT root.y1.
+  // d3.partition() places the root in only the *innermost* band
+  // (root.y1 === radius / (root.height + 1)), so using root.y1 makes ySpan
+  // negative for any non-root target and collapses every arc to zero area.
+  const xSpan = target._ox1 - target._ox0 || 2 * Math.PI;
+  const ySpan = radius - target._oy0 || 1;
+  const xDomain = [target._ox0, target._ox0 + xSpan];
+  const yDomain = [target._oy0, target._oy0 + ySpan];
+  // Leave space for the center hole when zoomed, but ensure yMin < yMax.
+  // The outer ring fills the full radius (yMax = radius).
+  const centerMargin = target.depth ? Math.min(60, radius * 0.3) : 0;
+  const yMin = centerMargin;
+  const yMax = radius;
+
+  const newX0 = [], newX1 = [], newY0 = [], newY1 = [];
+  const nodes = [];
+  for (const { data: d, el } of allArcs) {
+    nodes.push(d);
+
+    // Check if this arc is a descendant of the zoom target
+    let isDescendant = false;
+    let p = d.parent;
+    while (p) {
+      if (p === target) { isDescendant = true; break; }
+      p = p.parent;
+    }
+
+    // Only descendants of the target should be visible when zoomed
+    // Others are positioned outside the visible range
+    if (isDescendant || d === target) {
+      const tx0 = (d._ox0 - xDomain[0]) / xSpan * 2 * Math.PI;
+      const tx1 = (d._ox1 - xDomain[0]) / xSpan * 2 * Math.PI;
+      const ty0 = lerp(yMin, yMax, clamp((d._oy0 - yDomain[0]) / ySpan, 0, 1));
+      const ty1 = lerp(yMin, yMax, clamp((d._oy1 - yDomain[0]) / ySpan, 0, 1));
+      newX0.push(tx0); newX1.push(tx1); newY0.push(ty0); newY1.push(ty1);
+    } else {
+      // Position outside visible range
+      newX0.push(-1); newX1.push(-1); newY0.push(0); newY1.push(0);
+    }
+  }
+
+  // Animate from pre-zoom positions to target positions
+  // Hide cluster labels during zoom animation
+  const labels = gEl.querySelectorAll(".cluster-label");
+  labels.forEach(lbl => lbl.style.opacity = "0");
+  
   animate(450, (t, done) => {
     for (let i = 0; i < nodes.length; i++) {
       const d = nodes[i];
-      const x0 = lerp(d.x0, newX0[i], t);
-      const x1 = lerp(d.x1, newX1[i], t);
-      const y0 = lerp(d.y0, newY0[i], t);
-      const y1 = lerp(d.y1, newY1[i], t);
+      const el = allArcs[i].el;
+      const x0 = lerp(d._pz0, newX0[i], t);
+      const x1 = lerp(d._pz1, newX1[i], t);
+      const y0 = lerp(d._py0, newY0[i], t);
+      const y1 = lerp(d._py1, newY1[i], t);
       const cl = d.data.cluster || d.parent?.data?.cluster || "other";
       const padAngle = d.depth === 3 ? 0.002 : 0.005;
-      d.el.setAttribute("d", arcPath(x0, x1, y0, y1, padAngle));
-      // Hide arcs outside the visible range
-      const visible = x1 > 0 && x0 < 2 * Math.PI && y1 > y0;
-      d.el.style.opacity = visible ? 1 : 0;
+      
+      // Clamp positions for drawing, but use unclamped for visibility check
+      const cx0 = Math.max(0, Math.min(2 * Math.PI, x0));
+      const cx1 = Math.max(0, Math.min(2 * Math.PI, x1));
+      el.setAttribute("d", arcPath(cx0, cx1, y0, y1, padAngle));
+      
+      // Hide arcs outside the visible range or with invalid geometry
+      // Check if arc overlaps with [0, 2π] range and has positive dimensions
+      const inRange = !(x1 < 0 || x0 > 2 * Math.PI); // arc overlaps [0, 2π]
+      const hasSpan = x1 > x0 && y1 > 1;
+      const visible = inRange && hasSpan;
+      el.style.opacity = visible ? 1 : 0;
+
+      // Track the arc's overview label with the animated geometry
+      const label = allArcs[i].label;
+      if (label) {
+        const fs = d.depth === 3 ? 5 : 6;
+        const midA = (x0 + x1) / 2;
+        const midR = (y0 + y1) / 2;
+        const lx = Math.sin(midA) * midR;
+        const ly = -Math.cos(midA) * midR;
+        const deg = midA * 180 / Math.PI;
+        const flip = deg > 90 && deg < 270;
+        label.setAttribute("x", lx);
+        label.setAttribute("y", ly);
+        label.setAttribute("transform", `rotate(${flip ? deg + 180 : deg} ${lx} ${ly})`);
+        const arcLenNow = Math.abs(midR) * (x1 - x0);
+        const bandNow = y1 - y0;
+        const room = arcLenNow > fs * 1.15 && bandNow > 6;
+        if (visible && room) {
+          // Re-truncate against the current (possibly zoomed) wedge width
+          const mc = Math.max(2, Math.floor(arcLenNow / (fs * 0.62)) - 1);
+          let txt = label.dataset.full;
+          if (txt.length > mc) txt = txt.slice(0, Math.max(1, mc - 1)) + "…";
+          if (label.textContent !== txt) label.textContent = txt;
+          label.style.opacity = "1";
+        } else {
+          label.style.opacity = "0";
+        }
+      }
+
+      // Debug first 10 arcs on completion
+      if (done && i < 10) {
+        console.log(`Arc ${i} (${d.data.name}, depth ${d.depth}):`, {
+          relDepth: d.depth - target.depth,
+          x0, x1,
+          y0, y1,
+          _oy0: d._oy0, _oy1: d._oy1,
+          yDomain, yMin, yMax, ySpan,
+          visible
+        });
+      }
+      
+      // Update fill color based on relative depth from zoom target
+      const relDepth = d.depth - target.depth;
+      el.setAttribute("fill", clusterColor(cl, relDepth));
       if (done) { d.x0 = newX0[i]; d.x1 = newX1[i]; d.y0 = newY0[i]; d.y1 = newY1[i]; }
+    }
+    // Show labels again when animation done and at root level
+    if (done && target === root) {
+      labels.forEach(lbl => lbl.style.opacity = "1");
     }
   });
 
-  // Update center label
+  // Update center label and back button
   const center = $("center-label");
+  const backBtn = $("backBtn");
   if (target === root) {
     center.querySelector(".center-title").textContent = "Tech Tank";
     center.querySelector(".center-sub").textContent = "click a segment to explore";
     center.classList.remove("has-detail");
-    center.style.pointerEvents = "none";
     center.onclick = null;
+    backBtn.classList.remove("visible");
+    zoomStack = [];
   } else {
     center.querySelector(".center-title").textContent = target.data.name;
-    center.querySelector(".center-sub").textContent = target.depth === 1
-      ? `${target.children?.length || 0} categories`
-      : `${target.leaves().length} tools`;
+    center.querySelector(".center-sub").textContent = "click center to zoom out";
     center.classList.add("has-detail");
-    center.style.pointerEvents = "auto";
-    center.onclick = () => zoomTo(root);
+    center.onclick = () => zoomBack();
+    backBtn.classList.add("visible");
   }
 
   currentZoom = target;
@@ -443,6 +664,7 @@ function wire() {
   $("theme").onclick = () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
   $("q").addEventListener("input", () => highlightSearch($("q").value));
   $("detailClose").onclick = hideDetail;
+  $("backBtn").onclick = zoomBack;
   const observer = new MutationObserver(() => { if (TOOLS.length) renderSunburst(TOOLS); });
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 }
