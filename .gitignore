@@ -1,2 +1,8 @@
 .mimocode
 __pycache__
+.lean-ctx/
+check-colors.js
+check-svg.js
+debug-wheel.html
+test-wheel.html
+wheel-simple-test.html
