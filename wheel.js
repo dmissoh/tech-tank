@@ -1,24 +1,27 @@
 // Tech Tank — Sunburst Wheel
 // Interactive radial visualization of tools by cluster → category → tool.
+// Uses only d3.hierarchy + d3.partition from the vendored d3-hierarchy;
+// SVG creation, arc paths, and transitions are all vanilla JS.
 
 const DEFAULT_TOOLS = "data/tool_landscape_live.csv";
 const DEFAULT_CATS = "data/tool_categories.csv";
+const SVG_NS = "http://www.w3.org/2000/svg";
 
 const $ = (id) => document.getElementById(id);
 const params = () => new URLSearchParams(location.search);
-const D3 = () => window.d3;
 
 let TOOLS = [], CATS = [];
-let allArcs = []; // flat list of {data, element} for search highlighting
+let allArcs = [];
+let svgEl, gEl, root, radius;
+let currentZoom = null; // track zoom state
 
-// ---- helpers (duplicated from app.js to keep files independent) ----
+// ---- helpers ----
 const num = (t) => { const n = Number(t.score); return Number.isFinite(n) ? n : 0; };
 const isTrue = (v) => String(v).toLowerCase() === "true";
 const weight = (t) => Math.log10(num(t) + 1);
 const human = (n) => { n = Number(n) || 0; if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, "") + "M"; if (n >= 1e3) return (n / 1e3).toFixed(n >= 1e4 ? 0 : 1).replace(/\.0$/, "") + "k"; return String(n); };
 const stars = (t) => (num(t) > 0 ? "★ " + human(num(t)) : "—");
 const esc = (s) => (s == null ? "" : String(s)).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const idOf = (t) => t.tool_id || (t.name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const titleCase = (s) => (s || "").replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 const catRow = (cat) => CATS.find((c) => c.category === cat && !c.subcategory_id);
 const clusterOf = (cat) => (catRow(cat) || {}).cluster || "other";
@@ -38,21 +41,20 @@ function rel(dateStr) {
 
 // ---- cluster colors (oklch) ----
 const CLUSTER_COLORS = {
-  "agent-layer":   { base: "oklch(0.62 0.16 30)",  light: "oklch(0.78 0.10 30)",  dark: "oklch(0.58 0.18 30)" },
-  "runtime-stack": { base: "oklch(0.58 0.15 250)", light: "oklch(0.75 0.10 250)", dark: "oklch(0.54 0.17 250)" },
-  "platform-infra":{ base: "oklch(0.62 0.13 160)", light: "oklch(0.78 0.08 160)", dark: "oklch(0.58 0.15 160)" },
-  "modalities":    { base: "oklch(0.62 0.16 300)", light: "oklch(0.78 0.10 300)", dark: "oklch(0.58 0.18 300)" },
-  "discovery":     { base: "oklch(0.68 0.14 85)",  light: "oklch(0.82 0.09 85)",  dark: "oklch(0.64 0.16 85)" },
-  "domains":       { base: "oklch(0.58 0.11 140)", light: "oklch(0.74 0.08 140)", dark: "oklch(0.54 0.13 140)" },
-  "other":         { base: "oklch(0.60 0.06 60)",  light: "oklch(0.76 0.04 60)",  dark: "oklch(0.56 0.08 60)" },
+  "agent-layer":    { light: "oklch(0.78 0.10 30)",  dark: "oklch(0.58 0.18 30)" },
+  "runtime-stack":  { light: "oklch(0.75 0.10 250)", dark: "oklch(0.54 0.17 250)" },
+  "platform-infra": { light: "oklch(0.78 0.08 160)", dark: "oklch(0.58 0.15 160)" },
+  "modalities":     { light: "oklch(0.78 0.10 300)", dark: "oklch(0.58 0.18 300)" },
+  "discovery":      { light: "oklch(0.82 0.09 85)",  dark: "oklch(0.64 0.16 85)" },
+  "domains":        { light: "oklch(0.74 0.08 140)", dark: "oklch(0.54 0.13 140)" },
+  "other":          { light: "oklch(0.76 0.04 60)",  dark: "oklch(0.56 0.08 60)" },
 };
 
 function clusterColor(cluster, depth) {
   const isDark = document.documentElement.dataset.theme === "dark";
   const pal = CLUSTER_COLORS[cluster] || CLUSTER_COLORS["other"];
   const base = isDark ? pal.dark : pal.light;
-  if (depth === 1) return base; // cluster ring — full saturation
-  // category / tool rings — slightly lighter
+  if (depth === 1) return base;
   return base.replace(/oklch\(([\d.]+)/, (_, l) => `oklch(${Math.min(0.92, Number(l) + 0.08 * depth)})`);
 }
 
@@ -65,8 +67,7 @@ async function fetchCsv(url) {
 }
 
 // ---- hierarchy ----
-function buildHierarchy(tools, cats) {
-  // root > cluster > category > tool
+function buildHierarchy(tools) {
   const byCluster = new Map();
   for (const t of tools) {
     const cl = clusterOf(t.category);
@@ -75,7 +76,6 @@ function buildHierarchy(tools, cats) {
     if (!byCat.has(t.category)) byCat.set(t.category, []);
     byCat.get(t.category).push(t);
   }
-
   return {
     name: "Tech Tank",
     children: [...byCluster].map(([cl, byCat]) => ({
@@ -94,101 +94,130 @@ function buildHierarchy(tools, cats) {
   };
 }
 
+// ---- SVG arc path (vanilla math) ----
+function arcPath(x0, x1, y0, y1, padAngle) {
+  const r0 = Math.max(0, y0);
+  const r1 = Math.max(0, y1 - 1);
+  if (r1 <= 0 || x1 <= x0) return "";
+  const a0 = x0 + padAngle;
+  const a1 = x1 - padAngle;
+  const sa = Math.sin(a0), ca = Math.cos(a0);
+  const sb = Math.sin(a1), cb = Math.cos(a1);
+  const large = (a1 - a0) > Math.PI ? 1 : 0;
+  return [
+    `M${sa * r0},${-ca * r0}`,
+    `A${r0},${r0} 0 ${large} 1 ${sb * r0},${-cb * r0}`,
+    `L${sb * r1},${-cb * r1}`,
+    `A${r1},${r1} 0 ${large} 0 ${sa * r1},${-ca * r1}`,
+    "Z",
+  ].join(" ");
+}
+
+// ---- linear interpolation helper ----
+function lerp(a, b, t) { return a + (b - a) * t; }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+// ---- animate helper ----
+function animate(duration, onFrame) {
+  const start = performance.now();
+  function tick(now) {
+    const t = clamp((now - start) / duration, 0, 1);
+    const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; // easeInOutQuad
+    onFrame(eased, t >= 1);
+    if (t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
 // ---- sunburst render ----
-let svg, arc, partition, root;
-const TRANSITION_MS = 450;
-
 function renderSunburst(tools) {
-  const d3 = D3();
-  if (!d3) { $("sunburst").innerHTML = '<p class="error">d3-hierarchy failed to load.</p>'; return; }
-
-  const data = buildHierarchy(tools, CATS);
+  const data = buildHierarchy(tools);
   const w = Math.min(window.innerWidth - 820, window.innerHeight - 180, 700);
-  const size = Math.max(420, Math.min(700, w));
-  const radius = size / 2;
+  radius = Math.max(210, Math.min(350, w / 2));
+  const size = radius * 2;
 
-  $("sunburst").innerHTML = "";
-  svg = d3.select("#sunburst")
-    .append("svg")
-    .attr("width", size)
-    .attr("height", size)
-    .append("g")
-    .attr("transform", `translate(${radius},${radius})`);
+  const container = $("sunburst");
+  container.innerHTML = "";
 
-  partition = d3.partition().size([2 * Math.PI, radius]);
+  // Create SVG
+  svgEl = document.createElementNS(SVG_NS, "svg");
+  svgEl.setAttribute("width", size);
+  svgEl.setAttribute("height", size);
+  svgEl.style.display = "block";
+  container.appendChild(svgEl);
+
+  gEl = document.createElementNS(SVG_NS, "g");
+  gEl.setAttribute("transform", `translate(${radius},${radius})`);
+  svgEl.appendChild(gEl);
+
+  // Build hierarchy with d3
   root = d3.hierarchy(data)
     .sum((d) => d.value || 0)
     .sort((a, b) => b.value - a.value);
 
-  partition(root);
+  d3.partition().size([2 * Math.PI, radius])(root);
 
-  arc = d3.arc()
-    .startAngle((d) => d.x0)
-    .endAngle((d) => d.x1)
-    .padAngle(0.005)
-    .padRadius(radius / 2)
-    .innerRadius((d) => d.y0)
-    .outerRadius((d) => d.y1 - 1);
-
-  // Store current angles for transitions
-  root.each((d) => { d.x0s = d.x0; d.x1s = d.x1; d.y0s = d.y0; d.y1s = d.y1; });
-
+  currentZoom = root;
   allArcs = [];
 
-  const paths = svg.selectAll("path")
-    .data(root.descendants().filter((d) => d.depth > 0))
-    .join("path")
-    .attr("class", "sunburst-arc")
-    .attr("d", arc)
-    .attr("fill", (d) => {
-      const cluster = d.data.cluster || (d.depth === 1 ? d.data.cluster : d.parent?.data?.cluster) || "other";
-      if (d.depth === 1) return clusterColor(cluster, 1);
-      if (d.depth === 2) return clusterColor(cluster, 2);
-      return clusterColor(cluster, 3);
-    })
-    .attr("data-cluster", (d) => d.data.cluster || "")
-    .attr("data-name", (d) => d.data.name || "")
-    .on("mouseenter", onHover)
-    .on("mousemove", onMove)
-    .on("mouseleave", onLeave)
-    .on("click", onClick);
+  // Render arcs
+  const descendants = root.descendants().filter((d) => d.depth > 0);
+  for (const d of descendants) {
+    const path = document.createElementNS(SVG_NS, "path");
+    const cl = d.data.cluster || (d.depth === 1 ? d.data.cluster : d.parent?.data?.cluster) || "other";
+    const padAngle = d.depth === 3 ? 0.002 : 0.005;
+    path.setAttribute("d", arcPath(d.x0, d.x1, d.y0, d.y1, padAngle));
+    path.setAttribute("fill", clusterColor(cl, d.depth));
+    path.setAttribute("class", "sunburst-arc");
+    path.setAttribute("data-cluster", cl);
+    path.dataset.nodeId = d.data.name;
 
-  paths.each(function(d) { allArcs.push({ data: d, el: this }); });
+    path.addEventListener("mouseenter", (e) => onHover(e, d));
+    path.addEventListener("mousemove", onMove);
+    path.addEventListener("mouseleave", onLeave);
+    path.addEventListener("click", () => onClickArc(d));
 
-  // cluster labels (ring 1 only)
-  svg.selectAll("text.cluster-label")
-    .data(root.descendants().filter((d) => d.depth === 1))
-    .join("text")
-    .attr("class", "cluster-label")
-    .attr("transform", (d) => {
-      const angle = (d.x0 + d.x1) / 2;
-      const r = (d.y0 + d.y1) / 2;
-      const x = Math.sin(angle) * r;
-      const y = -Math.cos(angle) * r;
-      const deg = (angle * 180 / Math.PI);
-      const flip = deg > 90 && deg < 270;
-      return `translate(${x},${y}) rotate(${flip ? deg + 180 : deg})`;
-    })
-    .attr("text-anchor", "middle")
-    .attr("dominant-baseline", "central")
-    .attr("fill", (d) => {
-      const isDark = document.documentElement.dataset.theme === "dark";
-      return isDark ? "oklch(0.93 0.01 85)" : "oklch(0.20 0.01 60)";
-    })
-    .attr("font-size", "9px")
-    .attr("font-family", "var(--mono)")
-    .attr("letter-spacing", "0.08em")
-    .attr("pointer-events", "none")
-    .attr("text-transform", "uppercase")
-    .text((d) => {
-      const angle = d.x1 - d.x0;
-      const r = d.y1 - d.y0;
-      // Only show label if arc is big enough
-      if (angle < 0.25 || r < 30) return "";
-      return d.data.name.toUpperCase();
-    });
+    gEl.appendChild(path);
+    allArcs.push({ data: d, el: path });
+  }
 
-  // legend
+  // Cluster labels (ring 1)
+  const clusters = root.descendants().filter((d) => d.depth === 1);
+  const isDark = document.documentElement.dataset.theme === "dark";
+  const labelColor = isDark ? "oklch(0.93 0.01 85)" : "oklch(0.20 0.01 60)";
+
+  for (const d of clusters) {
+    const angle = (d.x0 + d.x1) / 2;
+    const r = (d.y0 + d.y1) / 2;
+    const arcSpan = d.x1 - d.x0;
+    const bandW = d.y1 - d.y0;
+    if (arcSpan < 0.25 || bandW < 30) continue;
+
+    const text = document.createElementNS(SVG_NS, "text");
+    const x = Math.sin(angle) * r;
+    const y = -Math.cos(angle) * r;
+    const deg = angle * 180 / Math.PI;
+    const flip = deg > 90 && deg < 270;
+    text.setAttribute("transform", `translate(${x},${y}) rotate(${flip ? deg + 180 : deg})`);
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("dominant-baseline", "central");
+    text.setAttribute("fill", labelColor);
+    text.setAttribute("font-size", "9px");
+    text.setAttribute("font-family", "var(--mono)");
+    text.setAttribute("letter-spacing", "0.08em");
+    text.setAttribute("pointer-events", "none");
+    text.textContent = d.data.name.toUpperCase();
+    gEl.appendChild(text);
+  }
+
+  // Center label
+  const center = $("center-label");
+  center.querySelector(".center-title").textContent = "Tech Tank";
+  center.querySelector(".center-sub").textContent = "click a segment to explore";
+  center.classList.remove("has-detail");
+  center.style.pointerEvents = "none";
+  center.onclick = null;
+
   renderLegend();
 }
 
@@ -216,21 +245,15 @@ const tooltip = $("tooltip");
 
 function onHover(event, d) {
   const isTool = !!d.data.tool;
-  const isCategory = d.depth === 2;
-  const isCluster = d.depth === 1;
-
   let html = `<div class="tt-name">${esc(d.data.name)}</div>`;
   if (isTool) {
     const t = d.data.tool;
     html += `<div class="tt-meta">${esc(t.category)} › ${esc(t.subcategory || "")}</div>`;
     html += `<div class="tt-stars">${stars(t)}</div>`;
-  } else if (isCategory) {
-    const count = d.children ? d.children.length : 0;
-    html += `<div class="tt-meta">${count} tool${count !== 1 ? "s" : ""}</div>`;
-  } else if (isCluster) {
-    const cats = d.children ? d.children.length : 0;
-    const tools = d.leaves().length;
-    html += `<div class="tt-meta">${cats} categories · ${tools} tools</div>`;
+  } else if (d.depth === 2) {
+    html += `<div class="tt-meta">${d.children ? d.children.length : 0} tools</div>`;
+  } else if (d.depth === 1) {
+    html += `<div class="tt-meta">${d.children ? d.children.length : 0} categories · ${d.leaves().length} tools</div>`;
   }
   tooltip.innerHTML = html;
   tooltip.hidden = false;
@@ -243,73 +266,77 @@ function onMove(event) {
 
 function onLeave() { tooltip.hidden = true; }
 
-function onClick(event, d) {
-  const isTool = !!d.data.tool;
-  const isCategory = d.depth === 2;
-  const isCluster = d.depth === 1;
-
-  if (isTool) {
-    showDetail(d.data.tool);
-    return;
-  }
-
-  // Zoom into category or cluster
+function onClickArc(d) {
+  if (d.data.tool) { showDetail(d.data.tool); return; }
   zoomTo(d);
 }
 
+// ---- zoom (animated arc paths) ----
 function zoomTo(target) {
-  const d3 = D3();
-  const t = svg.transition().duration(TRANSITION_MS);
+  // Save original positions before zoom
+  root.each((d) => {
+    if (d._ox0 === undefined) { d._ox0 = d.x0; d._ox1 = d.x1; d._oy0 = d.y0; d._oy1 = d.y1; }
+  });
 
-  const xScale = d3.scaleLinear().domain([target.x0, target.x1]).range([0, 2 * Math.PI]);
-  const yScale = d3.scaleLinear().domain([target.y0, root.y1]).range([target.depth ? 60 : 0, root.y1 - (target.depth ? 60 : 0)]);
+  // Compute target positions
+  const xDomain = [target._ox0, target._ox1];
+  const yDomain = [target._oy0, root._oy1];
+  const yMin = target.depth ? 60 : 0;
+  const yMax = root._oy1 - (target.depth ? 60 : 0);
 
-  svg.selectAll("path")
-    .transition(t)
-    .attrTween("d", function(d) {
-      const xi = d3.interpolate(d.x0, Math.max(0, Math.min(2 * Math.PI, xScale(d.x0))));
-      const xf = d3.interpolate(d.x1, Math.max(0, Math.min(2 * Math.PI, xScale(d.x1))));
-      const yi = d3.interpolate(d.y0, yScale(d.y0));
-      const yf = d3.interpolate(d.y1, yScale(d.y1));
-      return function(s) {
-        d.x0 = xi(s); d.x1 = xf(s);
-        d.y0 = yi(s); d.y1 = yf(s);
-        return arc(d);
-      };
-    })
-    .attr("fill-opacity", (d) => {
-      const angle = xScale(d.x0) < 0 || xScale(d.x1) > 2 * Math.PI ? 0 : 1;
-      return angle;
-    });
+  const newX0 = [], newX1 = [], newY0 = [], newY1 = [];
+  const paths = gEl.querySelectorAll("path");
+  const nodes = [];
+  for (const path of paths) {
+    const d = allArcs.find((a) => a.el === path)?.data;
+    if (!d) continue;
+    nodes.push(d);
 
-  svg.selectAll("text.cluster-label")
-    .transition(t)
-    .attr("opacity", (d) => {
-      const angle = xScale(d.x0) < 0 || xScale(d.x1) > 2 * Math.PI ? 0 : 1;
-      return angle;
-    });
+    // Map current (original) angles into target's [0, 2π] range
+    const tx0 = clamp((d._ox0 - xDomain[0]) / (xDomain[1] - xDomain[0]) * 2 * Math.PI, 0, 2 * Math.PI);
+    const tx1 = clamp((d._ox1 - xDomain[0]) / (xDomain[1] - xDomain[0]) * 2 * Math.PI, 0, 2 * Math.PI);
+    const ty0 = lerp(yMin, yMax, (d._oy0 - yDomain[0]) / (yDomain[1] - yDomain[0]));
+    const ty1 = lerp(yMin, yMax, (d._oy1 - yDomain[0]) / (yDomain[1] - yDomain[0]));
+    newX0.push(tx0); newX1.push(tx1); newY0.push(ty0); newY1.push(ty1);
+  }
+
+  // Animate
+  animate(450, (t, done) => {
+    for (let i = 0; i < nodes.length; i++) {
+      const d = nodes[i];
+      const x0 = lerp(d.x0, newX0[i], t);
+      const x1 = lerp(d.x1, newX1[i], t);
+      const y0 = lerp(d.y0, newY0[i], t);
+      const y1 = lerp(d.y1, newY1[i], t);
+      const cl = d.data.cluster || d.parent?.data?.cluster || "other";
+      const padAngle = d.depth === 3 ? 0.002 : 0.005;
+      d.el.setAttribute("d", arcPath(x0, x1, y0, y1, padAngle));
+      // Hide arcs outside the visible range
+      const visible = x1 > 0 && x0 < 2 * Math.PI && y1 > y0;
+      d.el.style.opacity = visible ? 1 : 0;
+      if (done) { d.x0 = newX0[i]; d.x1 = newX1[i]; d.y0 = newY0[i]; d.y1 = newY1[i]; }
+    }
+  });
 
   // Update center label
   const center = $("center-label");
-  if (target.depth === 0) {
+  if (target === root) {
     center.querySelector(".center-title").textContent = "Tech Tank";
     center.querySelector(".center-sub").textContent = "click a segment to explore";
     center.classList.remove("has-detail");
+    center.style.pointerEvents = "none";
+    center.onclick = null;
   } else {
     center.querySelector(".center-title").textContent = target.data.name;
     center.querySelector(".center-sub").textContent = target.depth === 1
       ? `${target.children?.length || 0} categories`
       : `${target.leaves().length} tools`;
     center.classList.add("has-detail");
+    center.style.pointerEvents = "auto";
+    center.onclick = () => zoomTo(root);
   }
 
-  // Make center clickable to zoom out
-  center.style.pointerEvents = target.depth > 0 ? "auto" : "none";
-  center.onclick = () => zoomTo(root);
-}
-
-function resetZoom() {
-  zoomTo(root);
+  currentZoom = target;
 }
 
 // ---- search ----
@@ -320,17 +347,13 @@ function highlightSearch(query) {
     if (!q) continue;
     const name = (d.data.name || "").toLowerCase();
     const cluster = (d.data.cluster || "").toLowerCase();
-    const toolName = d.data.tool ? (d.data.tool.name || "").toLowerCase() : "";
-    const toolDesc = d.data.tool ? (d.data.tool.description || "").toLowerCase() : "";
-    const toolCat = d.data.tool ? (d.data.tool.category || "").toLowerCase() : "";
-    const toolSub = d.data.tool ? (d.data.tool.subcategory || "").toLowerCase() : "";
-
-    const matches = name.includes(q) || cluster.includes(q) || toolName.includes(q) || toolDesc.includes(q) || toolCat.includes(q) || toolSub.includes(q);
-    if (matches) {
-      el.classList.add("highlighted");
-    } else {
-      el.classList.add("dimmed");
-    }
+    const t = d.data.tool;
+    const toolName = t ? (t.name || "").toLowerCase() : "";
+    const toolDesc = t ? (t.description || "").toLowerCase() : "";
+    const toolCat = t ? (t.category || "").toLowerCase() : "";
+    const toolSub = t ? (t.subcategory || "").toLowerCase() : "";
+    const match = name.includes(q) || cluster.includes(q) || toolName.includes(q) || toolDesc.includes(q) || toolCat.includes(q) || toolSub.includes(q);
+    el.classList.add(match ? "highlighted" : "dimmed");
   }
 }
 
@@ -345,17 +368,16 @@ function norm(t) {
   const wMin = Math.min(...weights), wMax = Math.max(...weights);
   return wMax > wMin ? Math.min(1, Math.max(0, (w - wMin) / (wMax - wMin))) : 0.5;
 }
-function isHot(t, tools) {
-  const sorted = tools.map(num).sort((a, b) => a - b);
-  const cut = sorted[Math.floor(sorted.length * 0.77)] ?? Infinity;
-  return num(t) >= cut;
+function isHot(t) {
+  const sorted = TOOLS.map(num).sort((a, b) => a - b);
+  return num(t) >= (sorted[Math.floor(sorted.length * 0.77)] ?? Infinity);
 }
 
 function detailHtml(t) {
   const subKey = `${t.category}|${t.subcategory}`;
   const subN = TOOLS.filter((x) => `${x.category}|${x.subcategory}` === subKey).length;
   const rank = t.rank_in_subcategory || "?";
-  const hot = isHot(t, TOOLS) ? `<span class="d-hot">🔥 hot</span>` : "";
+  const hot = isHot(t) ? `<span class="d-hot">🔥 hot</span>` : "";
   const links = [];
   if (t.github_url) links.push(`<a class="d-link" href="${esc(t.github_url)}" target="_blank" rel="noopener"><span>↳</span><span class="grow">${esc(t.github_url.replace(/^https?:\/\/(www\.)?github\.com\//, ""))}</span><span>↗</span></a>`);
   if (t.link) links.push(`<a class="d-link" href="${esc(t.link)}" target="_blank" rel="noopener"><span>⊕</span><span class="grow">${esc(t.link.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""))}</span><span>↗</span></a>`);
@@ -369,10 +391,7 @@ function detailHtml(t) {
       <div class="d-score"><b>${num(t) > 0 ? human(num(t)) : "—"}</b><span>github stars</span></div>
     </div>
     ${t.description ? `<p class="d-desc">${esc(t.description)}</p>` : ""}
-    <div class="d-sec">
-      <h4>Signal</h4>
-      ${bar("Stars", stars(t), norm(t) * 100)}
-    </div>
+    <div class="d-sec"><h4>Signal</h4>${bar("Stars", stars(t), norm(t) * 100)}</div>
     <div class="d-sec"><h4>Links</h4>${links.join("")}</div>
     <div class="d-sec"><h4>Properties</h4>
       ${kv("Offering", t.offering || "—")}
@@ -396,9 +415,7 @@ function showDetail(t) {
   $("detailPanel").hidden = false;
 }
 
-function hideDetail() {
-  $("detailPanel").hidden = true;
-}
+function hideDetail() { $("detailPanel").hidden = true; }
 
 // ---- boot ----
 async function load() {
@@ -426,7 +443,6 @@ function wire() {
   $("theme").onclick = () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
   $("q").addEventListener("input", () => highlightSearch($("q").value));
   $("detailClose").onclick = hideDetail;
-  // Re-render on theme change to update colors
   const observer = new MutationObserver(() => { if (TOOLS.length) renderSunburst(TOOLS); });
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 }
