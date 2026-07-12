@@ -25,3 +25,8 @@ developer-utilities,,Developer Utilities,,,platform-infra
 llm-training-education,,LLM Training & Education,,Tools related to llm training & education.,discovery
 obsidian-ecosystem,,Obsidian Ecosystem,,Tools related to obsidian ecosystem.,discovery
 data-open-data,,Data & Open Data,,Tools related to data & open data.,platform-infra
+agent-skills,,Agent Skills,,,agent-layer
+computer-vision,,Computer Vision,,,modalities
+git-version-control,,Git & Version Control,,,platform-infra
+llm-inference-compute,,LLM Inference & Compute,,,runtime-stack
+time-series-tabular-models,,Time Series & Tabular Models,,,domains

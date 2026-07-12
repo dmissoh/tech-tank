@@ -33,6 +33,11 @@ CLUSTER = {
     "Productivity & Workflow": "platform-infra",
     "Data & OSINT": "platform-infra",
     "Data & Open Data": "platform-infra",
+    "Agent Skills": "agent-layer",
+    "Computer Vision": "modalities",
+    "Git & Version Control": "platform-infra",
+    "LLM Inference & Compute": "runtime-stack",
+    "Time Series & Tabular Models": "domains",
     "Voice & Audio AI": "modalities",
     "Video & Media Generation": "modalities",
     "UI/UX & Design Tools": "modalities",
@@ -75,6 +80,7 @@ def resolve_wiki_links(tools):
             real = [l for l in gh_links if "yawo/architools" not in l]
             if real:
                 t["github_url"] = real[0]
+                t["link"] = real[0]  # point to the real repo, not the wiki page
         except Exception as e:
             print(f"  {t['name']}: {e}", file=sys.stderr)
 
@@ -82,6 +88,15 @@ def resolve_wiki_links(tools):
         list(pool.map(fetch_one, wiki_tools))
     resolved = sum(1 for t in wiki_tools if t["github_url"])
     print(f"resolved {resolved}/{len(wiki_tools)} wiki links to real GitHub repos", file=sys.stderr)
+
+    # Also fix tools that already had github_url but link still points to wiki
+    fixed = 0
+    for t in tools:
+        if t["github_url"] and "yawo.github.io/architools" in t["link"]:
+            t["link"] = t["github_url"]
+            fixed += 1
+    if fixed:
+        print(f"fixed {fixed} tools where github_url existed but link was still wiki", file=sys.stderr)
 
 def fetch_stars(tools):
     token = gh_token()
