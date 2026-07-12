@@ -58,7 +58,7 @@ header.site { background: var(--bg); position: sticky; top: 0; z-index: 20; }
 .eyebrow { margin: 0 0 14px; font: 11px var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
 .hero h1 { margin: 0; font: 400 clamp(34px, 6vw, 60px)/1.02 var(--serif); letter-spacing: -.5px; }
 .hero h1 em { font-weight: 500; }
-.lede { max-width: 560px; color: var(--muted); margin: 18px 0 30px; font-size: 15px; }
+.lede { /*max-width: 560px;*/ color: var(--muted); margin: 18px 0 30px; font-size: 15px; }
 .stats { display: flex; flex-wrap: wrap; gap: 0; border-top: 1px solid var(--line); }
 .stat { padding: 18px 30px 22px 0; margin-right: 30px; border-right: 1px solid var(--line); }
 .stat:last-child { border-right: 0; }
