@@ -252,8 +252,6 @@
       const typeLabel = isOpp ? t("type-label-opportunity") : t("type-label-company");
       const pillClass = isOpp ? "pill-opportunity" : "pill-company";
 
-      const needsExpand = d.description.length > 200;
-
       card.innerHTML =
         '<div class="card-head">' +
           '<h3 class="card-title">' + escHtml(d.title) + "</h3>" +
@@ -262,9 +260,7 @@
           "</div>" +
         "</div>" +
         '<p class="card-desc">' + escHtml(d.description) + "</p>" +
-        (needsExpand
-          ? '<button class="card-expand">' + t("expand") + "</button>"
-          : "") +
+        '<button class="card-expand" hidden>' + t("expand") + "</button>" +
         '<div class="card-footer">' +
           '<span class="card-category">' + escHtml(d.csvCategory || d.category) + "</span>" +
           (d.subcategory
@@ -272,20 +268,30 @@
             : "") +
         "</div>";
 
-      // Expand/collapse
-      if (needsExpand) {
-        const btn = card.querySelector(".card-expand");
-        btn.addEventListener("click", () => {
-          const expanded = card.classList.toggle("expanded");
-          btn.textContent = expanded ? t("collapse") : t("expand");
-        });
-      }
+      // Expand/collapse — show button only if text is actually clamped
+      const desc = card.querySelector(".card-desc");
+      const btn = card.querySelector(".card-expand");
+      btn.addEventListener("click", () => {
+        const expanded = card.classList.toggle("expanded");
+        btn.textContent = expanded ? t("collapse") : t("expand");
+      });
 
       frag.appendChild(card);
     });
 
     $grid.innerHTML = "";
     $grid.appendChild(frag);
+
+    // Post-render: show expand button only if text is actually clamped
+    requestAnimationFrame(() => {
+      $grid.querySelectorAll(".card").forEach((card) => {
+        const desc = card.querySelector(".card-desc");
+        const btn = card.querySelector(".card-expand");
+        if (desc && btn) {
+          btn.hidden = desc.scrollHeight <= desc.clientHeight + 1;
+        }
+      });
+    });
 
     if (filtered.length > 300) {
       const more = document.createElement("p");
