@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Use Cases — Tech Tank</title>
+<meta name="description" content="Explore AI use cases across industries — company and opportunity use cases with search and filters." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23c0492a'/%3E%3Ctext x='16' y='23' font-size='17' font-weight='700' font-family='monospace' fill='%23fff' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E" />
+<link rel="stylesheet" href="vendor/fonts.css" />
+<link rel="stylesheet" href="use-cases.css" />
+<script>document.documentElement.dataset.theme = localStorage.getItem("theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");</script>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="logo" href="?"><span>[Tech&nbsp;Tank]</span><b>ARCH</b></a>
+    <nav class="nav-links">
+      <a class="nav-link" href="index.html">Tools</a>
+      <a class="nav-link active" href="use-cases.html">Use Cases</a>
+    </nav>
+    <div class="src">
+      <button class="lang-toggle" id="langToggle" title="Switch language">EN</button>
+      <button class="file-btn" id="theme" title="Toggle theme" aria-label="Toggle theme">&#127769;</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow" data-i18n="eyebrow">AI use cases across industries</p>
+    <h1 data-i18n="hero-title">Real-world AI <em>use cases.</em></h1>
+    <p class="lede" data-i18n="hero-lede">Explore how companies deploy AI and discover opportunities for your industry.</p>
+    <div class="stats" id="stats"></div>
+  </div>
+</section>
+
+<section class="controls">
+  <div class="wrap">
+    <div class="search-wrap">
+      <input type="search" id="q" data-i18n-placeholder="search-placeholder" placeholder="Search use cases, companies..." autocomplete="off" />
+      <div class="autocomplete" id="autocomplete" hidden></div>
+    </div>
+    <select id="category"><option value="">All categories</option></select>
+    <select id="subcategory"><option value="">All subcategories</option></select>
+    <select id="type">
+      <option value="" data-i18n="all-types">All types</option>
+      <option value="companyusecase" data-i18n="type-company">Company Use Cases</option>
+      <option value="opportunityusecase" data-i18n="type-opportunity">Opportunities</option>
+    </select>
+    <span class="count" id="count"></span>
+  </div>
+</section>
+
+<main class="wrap">
+  <div id="status" class="loading">Loading use cases...</div>
+  <div id="grid" class="grid" hidden></div>
+  <div id="empty" class="empty" hidden>No use cases match your filters.</div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p><a href="index.html">Tech Tank</a> &mdash; Use cases extracted from industry reports and AI deployment documentation.</p>
+  </div>
+</footer>
+
+<script src="vendor/papaparse.min.js" defer></script>
+<script src="use-cases.js" defer></script>
+</body>
+</html>
