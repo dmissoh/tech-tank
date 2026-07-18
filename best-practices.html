@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Best Practices — Tech Tank</title>
+<meta name="description" content="AI engineering best practices, patterns, and tradeoffs organized by the Well-Architected Framework pillars." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23c0492a'/%3E%3Ctext x='16' y='23' font-size='17' font-weight='700' font-family='monospace' fill='%23fff' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E" />
+<link rel="stylesheet" href="vendor/fonts.css" />
+<link rel="stylesheet" href="best-practices.css" />
+<script>document.documentElement.dataset.theme = localStorage.getItem("theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");</script>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="logo" href="index.html"><span>[Tech&nbsp;Tank]</span><b>ARCH</b></a>
+    <nav class="nav-links">
+      <a class="nav-link" href="index.html">Tools</a>
+      <a class="nav-link" href="use-cases.html">Use Cases</a>
+      <a class="nav-link" href="wheel.html">Wheel</a>
+      <a class="nav-link active" href="best-practices.html">Best Practices</a>
+    </nav>
+    <div class="src">
+      <button class="file-btn" id="theme" title="Toggle theme" aria-label="Toggle theme">&#127769;</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Well-Architected AI</p>
+    <h1>Best practices, patterns, and <em>tradeoffs.</em></h1>
+    <p class="lede">60 patterns across 5 pillars — Reliability, Security, Operational Excellence, Performance, and Cost Optimization. Each pattern links to real tools in the catalog and to industry use cases.</p>
+    <div class="stats" id="stats"></div>
+  </div>
+</section>
+
+<section class="controls">
+  <div class="wrap">
+    <input type="search" id="q" placeholder="Search patterns..." autocomplete="off" />
+    <select id="pillar">
+      <option value="">All pillars</option>
+      <option value="reliability">Reliability</option>
+      <option value="security">Security</option>
+      <option value="operational-excellence">Operational Excellence</option>
+      <option value="performance">Performance</option>
+      <option value="cost-optimization">Cost Optimization</option>
+    </select>
+    <span class="count" id="count"></span>
+  </div>
+</section>
+
+<main class="wrap">
+  <div id="grid" class="pattern-grid"></div>
+  <div id="empty" class="empty" hidden>No patterns match your filters.</div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p><a href="index.html">Tech Tank</a> &mdash; Best practices derived from the AWS Well-Architected Framework, adapted for AI systems. Tool links go to the <a href="index.html">architecture tooling index</a>.</p>
+  </div>
+</footer>
+
+<script src="best-practices.js" defer></script>
+</body>
+</html>
