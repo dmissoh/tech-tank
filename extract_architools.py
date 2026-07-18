@@ -169,8 +169,72 @@ def rank(tools):
     for t in tools:
         groups.setdefault((t["category"], t["subcategory"]), []).append(t)
     for arr in groups.values():
-        for i, t in enumerate(sorted(arr, key=lambda x: -x["score"]), 1):
+        for i, t in enumerate(sorted(arr, key=lambda x: -int(x["score"] or 0)), 1):
             t["rank_in_subcategory"] = i
+
+def fix_categorization(tools):
+    """Post-processing to fix categorization issues found in the source data."""
+
+    # 1. Move skill-related tools from "Agent Runtimes & Frameworks" to "Agent Skills"
+    # These are curated lists, skill collections, or skill frameworks
+    for t in tools:
+        if t["category"] == "Agent Runtimes & Frameworks":
+            desc_lower = t["description"].lower()
+            name_lower = t["name"].lower()
+            # Check if it's a skill-related tool:
+            # - Name contains "skill" or "skills" (e.g., "google/skills")
+            # - Description mentions skills and is a collection/list
+            is_skill_name = any(kw in name_lower for kw in ["skill", "skills", "awesome"])
+            is_skill_desc = ("skill" in desc_lower and
+                           ("collection" in desc_lower or "curated" in desc_lower or
+                            "library" in desc_lower or "list" in desc_lower or
+                            "framework" in desc_lower))
+            # Don't move tools that are clearly runtimes/frameworks (not skill collections)
+            # Note: "skills framework" is still a skill tool, not a runtime
+            is_runtime = any(kw in desc_lower for kw in ["runtime", "harness", "orchestrator"]) and "skill" not in desc_lower
+            if (is_skill_name or is_skill_desc) and not is_runtime:
+                t["category"] = "Agent Skills"
+    
+    # 2. Move MCP tools from "Memory & Context Management" to "Model Context Protocol (MCP)"
+    # These are MCP servers that provide memory functionality
+    for t in tools:
+        if t["category"] == "Memory & Context Management":
+            desc_lower = t["description"].lower()
+            name_lower = t["name"].lower()
+            # Check if it's an MCP server (name contains mcp or description mentions MCP server)
+            if ("mcp" in name_lower or "mcp server" in desc_lower or 
+                "model context protocol" in desc_lower):
+                t["category"] = "Model Context Protocol (MCP)"
+    
+    # 3. Fix invalid subcategories
+    # Replace invalid subcategories with "Various"
+    invalid_subcats = {"--", "1.1k", "N/A", "n/a", ""}
+    for t in tools:
+        if t["subcategory"] in invalid_subcats:
+            t["subcategory"] = "Various"
+    
+    # 4. Remove duplicate tools (keep the one in the more specific category)
+    # Build a map of tool_id -> list of tools
+    tool_map = {}
+    for t in tools:
+        tid = t["tool_id"]
+        if tid not in tool_map:
+            tool_map[tid] = []
+        tool_map[tid].append(t)
+    
+    # For duplicates, keep the one in the more specific category
+    seen = set()
+    unique_tools = []
+    for t in tools:
+        tid = t["tool_id"]
+        if tid in seen:
+            continue
+        if len(tool_map[tid]) > 1:
+            # Keep the first occurrence (should be in the more specific category)
+            seen.add(tid)
+        unique_tools.append(t)
+    
+    return unique_tools
 
 def main():
     doc = open(sys.argv[1], encoding="utf-8").read() if len(sys.argv) > 1 else \
@@ -178,6 +242,7 @@ def main():
     tools, cats = parse(doc)
     resolve_wiki_links(tools)
     fetch_stars(tools)
+    tools = fix_categorization(tools)
     rank(tools)
     cols = ["name","tool_id","category","subcategory","description","link","github_url","offering",
             "open_source","self_hostable","pricing","maturity","released_at","updated_at","score","rank_in_subcategory"]
