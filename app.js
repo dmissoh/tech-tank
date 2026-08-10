@@ -187,7 +187,7 @@ function renderList(tools, root) {
     return;
   }
   const grouped = group(tools);
-  const order = ["agent-layer", "runtime-stack", "platform-infra", "modalities", "discovery"];
+  const order = ["agent-layer", "runtime-stack", "platform-infra", "modalities", "domains", "discovery"];
   const clusters = [...grouped.keys()].sort((a, b) => (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99) || a.localeCompare(b));
   for (const cl of clusters) {
     root.appendChild(el("h2", "cluster-head", esc(titleCase(cl))));

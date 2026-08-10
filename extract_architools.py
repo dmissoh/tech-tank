@@ -129,6 +129,44 @@ def clean(s):
     text = html.unescape(re.sub(r"<[^>]+>", "", s))
     return re.sub(r"[​‌‍﻿]", "", text).strip()
 
+def make_tool(category, tname, link, tdesc, lang):
+    """Convert one (name, link, description, language) row into a tool dict."""
+    link = urljoin(BASE, html.unescape(link)) if link else ""
+    gh = link if "github.com" in link else ""
+    website = "" if gh else link  # source has one URL per tool: repo OR site, not both
+    oss = bool(gh)
+    offering = "saas" if lang.lower() == "saas" else ("oss-library" if oss else "hybrid")
+    return {
+        "name": tname, "tool_id": slug(tname), "category": category, "subcategory": lang or "General",
+        "description": tdesc, "link": website, "github_url": gh, "offering": offering,
+        "open_source": str(oss).lower(), "self_hostable": str(oss).lower(),
+        "pricing": "free" if oss else "freemium", "maturity": "", "released_at": "", "updated_at": "",
+        "score": 0, "rank_in_subcategory": 0,
+    }
+
+def parse_pipe_table(sec):
+    """Parse markdown pipe-table tool rows the wiki renders as <p>| link | desc | lang |</p>."""
+    entries = []
+    for pm in re.finditer(r"<p>(\s*\|.*?)</p>", sec, re.S):
+        txt = pm.group(1)
+        if "<a href" not in txt:
+            continue
+        cells = [c.strip() for c in txt.split("|")]
+        cells = cells[1:-1]  # drop leading/trailing empties from the outer pipes
+        i = 0
+        while i < len(cells):
+            if i + 2 >= len(cells):
+                break
+            nm_cell, desc_cell, lang_cell = cells[i], cells[i + 1], cells[i + 2]
+            link_m = re.search(r'href="([^"]+)"', nm_cell)
+            tname = clean(nm_cell)
+            if tname:
+                entries.append((tname, link_m.group(1) if link_m else "", clean(desc_cell), lang_cell.strip()))
+            i += 3
+            if i < len(cells) and cells[i] == "":
+                i += 1  # separator cell between rows
+    return entries
+
 def parse(doc):
     # split into <h2 id=...>Name ...</h2> ... (until next <h2 or end)
     secs = re.split(r'<h2 id="[^"]*"[^>]*>', doc)
@@ -150,18 +188,10 @@ def parse(doc):
             tname, tdesc, lang = clean(tds[0]), clean(tds[1]), clean(tds[2])
             if not tname:
                 continue
-            gh = link if "github.com" in link else ""
-            website = "" if gh else link  # source has one URL per tool: repo OR site, not both
-            oss = bool(gh)
-            offering = "saas" if lang.lower() == "saas" else ("oss-library" if oss else "hybrid")
-            tid = slug(tname)
-            tools.append({
-                "name": tname, "tool_id": tid, "category": name, "subcategory": lang or "General",
-                "description": tdesc, "link": website, "github_url": gh, "offering": offering,
-                "open_source": str(oss).lower(), "self_hostable": str(oss).lower(),
-                "pricing": "free" if oss else "freemium", "maturity": "", "released_at": "", "updated_at": "",
-                "score": 0, "rank_in_subcategory": 0,
-            })
+            tools.append(make_tool(name, tname, link, tdesc, lang))
+        # second format: markdown pipe-tables rendered as <p> after the <hr>
+        for tname, link, tdesc, lang in parse_pipe_table(sec):
+            tools.append(make_tool(name, tname, link, tdesc, lang))
     return tools, cats
 
 def rank(tools):
