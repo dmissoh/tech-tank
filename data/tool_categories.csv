@@ -1,32 +1,185 @@
 category_id,subcategory_id,category,subcategory,description,cluster
-academic-research,,Academic & Research,,"Tools for academic writing, research synthesis, and scientific document generation.",discovery
-agent-runtimes-frameworks,,Agent Runtimes & Frameworks,,"Tools for building, running, and managing AI agents.",agent-layer
-ai-coding-assistants-harnesses,,AI Coding Assistants & Harnesses,,"Tools for building deterministic, repeatable AI coding workflows.",agent-layer
-data-osint,,Data & OSINT,,Tools for open-source intelligence and real-time data aggregation.,platform-infra
-diagramming-architecture,,Diagramming & Architecture,,Tools for creating software architecture diagrams and visualizations.,platform-infra
-databases-vector-stores,,Databases & Vector Stores,,Specialized databases for AI applications and vector storage.,runtime-stack
-developer-tools-cli,,Developer Tools & CLI,,Command-line tools and utilities for developers.,platform-infra
-finance-trading,,Finance & Trading,,AI-powered financial tools and trading platforms.,domains
-legal-compliance,,Legal & Compliance,,AI tools and agent skills specialized for legal professionals and compliance workflows.,domains
-llm-apis-routing,,LLM APIs & Routing,,"Tools for managing, routing, and optimizing LLM API calls.",runtime-stack
-infrastructure-eventing,,Infrastructure & Eventing,,"Distributed messaging, event meshes, and backend infrastructure for AI systems.",runtime-stack
-model-context-protocol-mcp,,Model Context Protocol (MCP),,Servers and tools following the Model Context Protocol.,agent-layer
-memory-context-management,,Memory & Context Management,,Tools for managing AI memory and context across sessions.,agent-layer
-productivity-workflow,,Productivity & Workflow,,Tools for enhancing productivity and workflow automation.,platform-infra
-rag-knowledge-graphs,,RAG & Knowledge Graphs,,Tools for retrieval-augmented generation and knowledge graph management.,runtime-stack
-security-privacy-pentesting,,"Security, Privacy & Pentesting",,"AI-powered security tools, PII anonymization, and penetration testing frameworks.",platform-infra
-ui-ux-design-tools,,UI/UX & Design Tools,,"Tools for design, prototyping, and UI/UX workflows.",modalities
-voice-audio-ai,,Voice & Audio AI,,"Tools for voice synthesis, audio AI, and speech processing.",modalities
-video-media-generation,,Video & Media Generation,,Tools for AI-powered video generation and media creation.,modalities
-web-app-frameworks,,Web & App Frameworks,,Frameworks and platforms for building modern web applications and commerce.,platform-infra
-web-scraping-automation,,Web Scraping & Automation,,"Tools for web scraping, crawling, and browser automation.",platform-infra
-french-admin-finance-skills,,French Admin & Finance Skills,,"Collections de skills IA spécialisés dans la paperasse, comptabilité, fiscalité et gestion françaises.",domains
-developer-utilities,,Developer Utilities,,,platform-infra
-llm-training-education,,LLM Training & Education,,Tools related to llm training & education.,discovery
-obsidian-ecosystem,,Obsidian Ecosystem,,Tools related to obsidian ecosystem.,discovery
-data-open-data,,Data & Open Data,,Tools related to data & open data.,platform-infra
-agent-skills,,Agent Skills,,,agent-layer
-computer-vision,,Computer Vision,,,modalities
-git-version-control,,Git & Version Control,,,platform-infra
-llm-inference-compute,,LLM Inference & Compute,,,runtime-stack
-time-series-tabular-models,,Time Series & Tabular Models,,,domains
+academic-research,python,Academic & Research,Python,Python-based research tools and libraries.,discovery
+academic-research,saas,Academic & Research,SaaS,Hosted platforms for academic writing and research.,discovery
+academic-research,typescript,Academic & Research,TypeScript,TypeScript/JavaScript tools for academic workflows.,discovery
+academic-research,various,Academic & Research,Various,Multi-language or language-agnostic research tools.,discovery
+agent-runtimes-frameworks,blog,Agent Runtimes & Frameworks,Blog,Blog posts describing agent architectures.,agent-layer
+agent-runtimes-frameworks,elixir,Agent Runtimes & Frameworks,Elixir,Elixir/OTP-based agent orchestration.,agent-layer
+agent-runtimes-frameworks,go,Agent Runtimes & Frameworks,Go,Go-based agent runtimes and infrastructure.,agent-layer
+agent-runtimes-frameworks,javascript,Agent Runtimes & Frameworks,JavaScript,JavaScript agent runtimes (non-TypeScript).,agent-layer
+agent-runtimes-frameworks,jupyter-notebook,Agent Runtimes & Frameworks,Jupyter Notebook,Notebook-based agent architectures and benchmarks.,agent-layer
+agent-runtimes-frameworks,markdown,Agent Runtimes & Frameworks,Markdown,Markdown-defined agent specifications and docs.,agent-layer
+agent-runtimes-frameworks,python,Agent Runtimes & Frameworks,Python,Python-based agent runtimes and orchestration frameworks.,agent-layer
+agent-runtimes-frameworks,rust,Agent Runtimes & Frameworks,Rust,Rust-based agent runtimes for performance and safety.,agent-layer
+agent-runtimes-frameworks,saas,Agent Runtimes & Frameworks,SaaS,Hosted agent runtime platforms.,agent-layer
+agent-runtimes-frameworks,shell,Agent Runtimes & Frameworks,Shell,Shell-script based agent tooling.,agent-layer
+agent-runtimes-frameworks,typescript,Agent Runtimes & Frameworks,TypeScript,TypeScript/JavaScript agent frameworks and runtimes.,agent-layer
+agent-runtimes-frameworks,various,Agent Runtimes & Frameworks,Various,Multi-language or polyglot agent frameworks.,agent-layer
+agent-skills,go,Agent Skills,Go,Go-based agent skills.,agent-layer
+agent-skills,html,Agent Skills,HTML,HTML-based skill definitions.,agent-layer
+agent-skills,javascript,Agent Skills,JavaScript,JavaScript agent skills (non-TypeScript).,agent-layer
+agent-skills,markdown,Agent Skills,Markdown,Curated Markdown lists of agent skills.,agent-layer
+agent-skills,python,Agent Skills,Python,Python-based agent skills and skill libraries.,agent-layer
+agent-skills,rust,Agent Skills,Rust,Rust-based agent skills.,agent-layer
+agent-skills,typescript,Agent Skills,TypeScript,TypeScript/JavaScript agent skills.,agent-layer
+agent-skills,various,Agent Skills,Various,Multi-language or language-agnostic skill collections.,agent-layer
+ai-coding-assistants-harnesses,blog,AI Coding Assistants & Harnesses,Blog,Blog posts about coding harnesses.,agent-layer
+ai-coding-assistants-harnesses,desktop,AI Coding Assistants & Harnesses,Desktop,Desktop applications for AI coding.,agent-layer
+ai-coding-assistants-harnesses,emacs-lisp,AI Coding Assistants & Harnesses,Emacs Lisp,Emacs Lisp coding agent integrations.,agent-layer
+ai-coding-assistants-harnesses,go,AI Coding Assistants & Harnesses,Go,Go-based coding agents.,agent-layer
+ai-coding-assistants-harnesses,html,AI Coding Assistants & Harnesses,HTML,HTML-based coding tools.,agent-layer
+ai-coding-assistants-harnesses,javascript,AI Coding Assistants & Harnesses,JavaScript,JavaScript coding agents (non-TypeScript).,agent-layer
+ai-coding-assistants-harnesses,python,AI Coding Assistants & Harnesses,Python,Python-based coding agents and harnesses.,agent-layer
+ai-coding-assistants-harnesses,rust,AI Coding Assistants & Harnesses,Rust,Rust-based coding agents.,agent-layer
+ai-coding-assistants-harnesses,saas,AI Coding Assistants & Harnesses,SaaS,Hosted AI coding platforms.,agent-layer
+ai-coding-assistants-harnesses,shell,AI Coding Assistants & Harnesses,Shell,Shell-based coding harnesses.,agent-layer
+ai-coding-assistants-harnesses,swift,AI Coding Assistants & Harnesses,Swift,Swift/native macOS coding agents.,agent-layer
+ai-coding-assistants-harnesses,typescript,AI Coding Assistants & Harnesses,TypeScript,TypeScript/JavaScript coding agents.,agent-layer
+ai-coding-assistants-harnesses,various,AI Coding Assistants & Harnesses,Various,Multi-language coding assistant tools.,agent-layer
+ai-coding-assistants-harnesses,zero,AI Coding Assistants & Harnesses,Zero,Zero-language / systems programming for agents.,agent-layer
+computer-vision,python,Computer Vision,Python,Python-based computer vision tools.,modalities
+data-open-data,java,Data & Open Data,Java,Java tools for open data.,platform-infra
+data-open-data,markdown,Data & Open Data,Markdown,Markdown-based open data documentation.,platform-infra
+data-open-data,python,Data & Open Data,Python,Python tools for open data access.,platform-infra
+data-open-data,rust,Data & Open Data,Rust,Rust tools for open data.,platform-infra
+data-open-data,saas,Data & Open Data,SaaS,Hosted open data platforms.,platform-infra
+data-open-data,typescript,Data & Open Data,TypeScript,TypeScript tools for open data.,platform-infra
+data-open-data,various,Data & Open Data,Various,Multi-language open data tools.,platform-infra
+data-osint,python,Data & OSINT,Python,Python-based OSINT and data intelligence tools.,platform-infra
+data-osint,typescript,Data & OSINT,TypeScript,TypeScript-based OSINT platforms.,platform-infra
+data-osint,various,Data & OSINT,Various,Multi-language OSINT tools.,platform-infra
+databases-vector-stores,go,Databases & Vector Stores,Go,Go-based vector and specialized databases.,runtime-stack
+databases-vector-stores,python,Databases & Vector Stores,Python,Python-based database tools.,runtime-stack
+databases-vector-stores,rust,Databases & Vector Stores,Rust,Rust-based vector databases and search engines.,runtime-stack
+databases-vector-stores,saas,Databases & Vector Stores,SaaS,Hosted database platforms.,runtime-stack
+databases-vector-stores,typescript,Databases & Vector Stores,TypeScript,TypeScript database clients and tools.,runtime-stack
+developer-tools-cli,baml,Developer Tools & CLI,BAML,BAML language tooling.,platform-infra
+developer-tools-cli,c,Developer Tools & CLI,C,C-based developer utilities.,platform-infra
+developer-tools-cli,go,Developer Tools & CLI,Go,Go-based developer CLI tools.,platform-infra
+developer-tools-cli,ipxe,Developer Tools & CLI,iPXE,iPXE boot scripting tools.,platform-infra
+developer-tools-cli,java,Developer Tools & CLI,Java,Java-based developer tools.,platform-infra
+developer-tools-cli,javascript,Developer Tools & CLI,JavaScript,JavaScript-based developer tools & cli tools.,platform-infra
+developer-tools-cli,node,Developer Tools & CLI,Node,Node.js specific developer tools.,platform-infra
+developer-tools-cli,powershell,Developer Tools & CLI,PowerShell,PowerShell developer tools.,platform-infra
+developer-tools-cli,python,Developer Tools & CLI,Python,Python-based developer CLIs.,platform-infra
+developer-tools-cli,rust,Developer Tools & CLI,Rust,Rust-based developer CLI tools.,platform-infra
+developer-tools-cli,saas,Developer Tools & CLI,SaaS,Hosted developer tooling platforms.,platform-infra
+developer-tools-cli,shell,Developer Tools & CLI,Shell,Shell script developer tools.,platform-infra
+developer-tools-cli,swift,Developer Tools & CLI,Swift,Swift/macOS native developer tools.,platform-infra
+developer-tools-cli,typescript,Developer Tools & CLI,TypeScript,TypeScript/JavaScript developer tools.,platform-infra
+developer-tools-cli,typescript-python,Developer Tools & CLI,TypeScript/Python,Polyglot TypeScript/Python tools.,platform-infra
+developer-tools-cli,various,Developer Tools & CLI,Various,Multi-language developer utilities.,platform-infra
+developer-utilities,markdown,Developer Utilities,Markdown,Markdown-based developer utilities.,platform-infra
+developer-utilities,shell,Developer Utilities,Shell,Shell-based developer utilities.,platform-infra
+developer-utilities,various,Developer Utilities,Various,Multi-language developer utilities.,platform-infra
+diagramming-architecture,go,Diagramming & Architecture,Go,Go-based diagramming tools.,platform-infra
+diagramming-architecture,html,Diagramming & Architecture,HTML,HTML-based diagram generators.,platform-infra
+diagramming-architecture,java,Diagramming & Architecture,Java,Java-based architecture modeling.,platform-infra
+diagramming-architecture,javascript,Diagramming & Architecture,JavaScript,JavaScript diagramming (non-TypeScript).,platform-infra
+diagramming-architecture,python,Diagramming & Architecture,Python,Python diagramming tools.,platform-infra
+diagramming-architecture,typescript,Diagramming & Architecture,TypeScript,TypeScript diagramming libraries and tools.,platform-infra
+diagramming-architecture,various,Diagramming & Architecture,Various,Multi-language diagramming tools.,platform-infra
+diagramming-architecture,web,Diagramming & Architecture,Web,Web-based diagramming platforms.,platform-infra
+finance-trading,python,Finance & Trading,Python,Python-based financial tools.,domains
+finance-trading,saas,Finance & Trading,SaaS,Hosted financial platforms.,domains
+git-version-control,go,Git & Version Control,Go,Go-based Git tools.,platform-infra
+git-version-control,python,Git & Version Control,Python,Python Git utilities.,platform-infra
+git-version-control,rust,Git & Version Control,Rust,Rust-based Git tools.,platform-infra
+git-version-control,shell,Git & Version Control,Shell,Shell Git workflows.,platform-infra
+git-version-control,typescript,Git & Version Control,TypeScript,TypeScript Git tools.,platform-infra
+infrastructure-eventing,go,Infrastructure & Eventing,Go,Go-based eventing infrastructure.,runtime-stack
+infrastructure-eventing,java,Infrastructure & Eventing,Java,Java-based eventing platforms.,runtime-stack
+infrastructure-eventing,mdx,Infrastructure & Eventing,MDX,MDX-based infrastructure definitions.,runtime-stack
+infrastructure-eventing,python,Infrastructure & Eventing,Python,Python eventing tools.,runtime-stack
+infrastructure-eventing,rust,Infrastructure & Eventing,Rust,Rust-based eventing infrastructure.,runtime-stack
+infrastructure-eventing,saas,Infrastructure & Eventing,SaaS,Hosted eventing platforms.,runtime-stack
+infrastructure-eventing,typescript,Infrastructure & Eventing,TypeScript,TypeScript eventing tools.,runtime-stack
+legal-compliance,python,Legal & Compliance,Python,Python legal tech tools.,domains
+legal-compliance,rust,Legal & Compliance,Rust,Rust legal compliance tools.,domains
+legal-compliance,typescript,Legal & Compliance,TypeScript,TypeScript legal tech.,domains
+llm-apis-routing,go,LLM APIs & Routing,Go,Go-based LLM routing and API tools.,runtime-stack
+llm-apis-routing,markdown,LLM APIs & Routing,Markdown,Markdown LLM routing configs.,runtime-stack
+llm-apis-routing,python,LLM APIs & Routing,Python,Python LLM routing libraries.,runtime-stack
+llm-apis-routing,rust,LLM APIs & Routing,Rust,Rust LLM API tools.,runtime-stack
+llm-apis-routing,saas,LLM APIs & Routing,SaaS,Hosted LLM routing platforms.,runtime-stack
+llm-apis-routing,shell,LLM APIs & Routing,Shell,Shell-based LLM routing.,runtime-stack
+llm-apis-routing,spec,LLM APIs & Routing,Spec,Spec-driven LLM routing.,runtime-stack
+llm-apis-routing,typescript,LLM APIs & Routing,TypeScript,TypeScript LLM API tools.,runtime-stack
+llm-inference-compute,c,LLM Inference & Compute,C,C-based inference engines.,runtime-stack
+llm-inference-compute,cpp,LLM Inference & Compute,C++,C++ inference engines.,runtime-stack
+llm-inference-compute,go,LLM Inference & Compute,Go,Go-based inference tools.,runtime-stack
+llm-inference-compute,python,LLM Inference & Compute,Python,Python inference libraries.,runtime-stack
+llm-inference-compute,rust,LLM Inference & Compute,Rust,Rust inference engines.,runtime-stack
+llm-inference-compute,saas,LLM Inference & Compute,SaaS,Hosted inference platforms.,runtime-stack
+llm-inference-compute,shell,LLM Inference & Compute,Shell,Shell-based inference tooling.,runtime-stack
+llm-inference-compute,various,LLM Inference & Compute,Various,Multi-language inference tools.,runtime-stack
+llm-training-education,jupyter-notebook,LLM Training & Education,Jupyter Notebook,Notebook-based LLM training.,discovery
+llm-training-education,python,LLM Training & Education,Python,Python LLM training tools.,discovery
+llm-training-education,various,LLM Training & Education,Various,Multi-language LLM training.,discovery
+memory-context-management,cpp-python,Memory & Context Management,C++/Python,C++/Python hybrid memory tools.,agent-layer
+memory-context-management,go,Memory & Context Management,Go,Go-based memory management.,agent-layer
+memory-context-management,python,Memory & Context Management,Python,Python memory/context management.,agent-layer
+memory-context-management,python-rust,Memory & Context Management,Python/Rust,Python/Rust hybrid memory tools.,agent-layer
+memory-context-management,typescript,Memory & Context Management,TypeScript,TypeScript memory tools.,agent-layer
+memory-context-management,various,Memory & Context Management,Various,Multi-language memory tools.,agent-layer
+model-context-protocol-mcp,c,Model Context Protocol (MCP),C,C-based MCP tools.,agent-layer
+model-context-protocol-mcp,go,Model Context Protocol (MCP),Go,Go MCP servers.,agent-layer
+model-context-protocol-mcp,javascript,Model Context Protocol (MCP),JavaScript,JavaScript MCP tools.,agent-layer
+model-context-protocol-mcp,node,Model Context Protocol (MCP),Node,Node.js MCP servers.,agent-layer
+model-context-protocol-mcp,python,Model Context Protocol (MCP),Python,Python MCP servers and clients.,agent-layer
+model-context-protocol-mcp,rust,Model Context Protocol (MCP),Rust,Rust MCP implementations.,agent-layer
+model-context-protocol-mcp,typescript,Model Context Protocol (MCP),TypeScript,TypeScript MCP implementations.,agent-layer
+model-context-protocol-mcp,various,Model Context Protocol (MCP),Various,Multi-language MCP tools.,agent-layer
+obsidian-ecosystem,python-shell,Obsidian Ecosystem,Python/Shell,Python/Shell Obsidian tooling.,discovery
+obsidian-ecosystem,typescript,Obsidian Ecosystem,TypeScript,TypeScript Obsidian plugins.,discovery
+obsidian-ecosystem,various,Obsidian Ecosystem,Various,Multi-language Obsidian tools.,discovery
+productivity-workflow,c,Productivity & Workflow,C#,C# productivity tools.,platform-infra
+productivity-workflow,html,Productivity & Workflow,HTML,HTML-based productivity tools.,platform-infra
+productivity-workflow,javascript,Productivity & Workflow,JavaScript,JavaScript productivity tools.,platform-infra
+productivity-workflow,markdown,Productivity & Workflow,Markdown,Markdown productivity workflows.,platform-infra
+productivity-workflow,python,Productivity & Workflow,Python,Python productivity tools.,platform-infra
+productivity-workflow,python-js,Productivity & Workflow,Python/JS,Python/JavaScript hybrid tools.,platform-infra
+productivity-workflow,rust,Productivity & Workflow,Rust,Rust productivity tools.,platform-infra
+productivity-workflow,saas,Productivity & Workflow,SaaS,Hosted productivity platforms.,platform-infra
+productivity-workflow,typescript,Productivity & Workflow,TypeScript,TypeScript productivity tools.,platform-infra
+productivity-workflow,various,Productivity & Workflow,Various,Multi-language productivity tools.,platform-infra
+productivity-workflow,web,Productivity & Workflow,Web,Web-based productivity platforms.,platform-infra
+rag-knowledge-graphs,markdown,RAG & Knowledge Graphs,Markdown,Markdown-based RAG configs.,runtime-stack
+rag-knowledge-graphs,model,RAG & Knowledge Graphs,Model,Model-based RAG approaches.,runtime-stack
+rag-knowledge-graphs,python,RAG & Knowledge Graphs,Python,Python RAG and knowledge graph tools.,runtime-stack
+rag-knowledge-graphs,python-rust,RAG & Knowledge Graphs,Python/Rust,Python/Rust hybrid RAG.,runtime-stack
+rag-knowledge-graphs,rust,RAG & Knowledge Graphs,Rust,Rust RAG and graph tools.,runtime-stack
+rag-knowledge-graphs,typescript,RAG & Knowledge Graphs,TypeScript,TypeScript RAG implementations.,runtime-stack
+rag-knowledge-graphs,various,RAG & Knowledge Graphs,Various,Multi-language RAG tools.,runtime-stack
+security-privacy-pentesting,go,"Security, Privacy & Pentesting",Go,"Go-based security, privacy & pentesting tools.",platform-infra
+security-privacy-pentesting,python,"Security, Privacy & Pentesting",Python,"Python-based security, privacy & pentesting tools.",platform-infra
+security-privacy-pentesting,rust,"Security, Privacy & Pentesting",Rust,"Rust-based security, privacy & pentesting tools.",platform-infra
+security-privacy-pentesting,saas,"Security, Privacy & Pentesting",SaaS,"SaaS-based security, privacy & pentesting tools.",platform-infra
+security-privacy-pentesting,typescript,"Security, Privacy & Pentesting",TypeScript,"TypeScript-based security, privacy & pentesting tools.",platform-infra
+security-privacy-pentesting,various,"Security, Privacy & Pentesting",Various,Security and privacy tools.,platform-infra
+time-series-tabular-models,python,Time Series & Tabular Models,Python,Python time series and tabular models.,domains
+ui-ux-design-tools,css,UI/UX & Design Tools,CSS,CSS-based design tools.,modalities
+ui-ux-design-tools,javascript,UI/UX & Design Tools,JavaScript,JavaScript design tools.,modalities
+ui-ux-design-tools,markdown,UI/UX & Design Tools,Markdown,Markdown design documentation.,modalities
+ui-ux-design-tools,saas,UI/UX & Design Tools,SaaS,Hosted design platforms.,modalities
+ui-ux-design-tools,typescript,UI/UX & Design Tools,TypeScript,TypeScript design tools.,modalities
+ui-ux-design-tools,various,UI/UX & Design Tools,Various,Multi-language design tools.,modalities
+ui-ux-design-tools,web,UI/UX & Design Tools,Web,Web-based design tools.,modalities
+video-media-generation,python,Video & Media Generation,Python,Python video generation tools.,modalities
+video-media-generation,typescript,Video & Media Generation,TypeScript,TypeScript video generation.,modalities
+video-media-generation,various,Video & Media Generation,Various,Multi-language video tools.,modalities
+voice-audio-ai,javascript,Voice & Audio AI,JavaScript,JavaScript voice tools.,modalities
+voice-audio-ai,python,Voice & Audio AI,Python,Python voice/audio AI tools.,modalities
+voice-audio-ai,python-typescript,Voice & Audio AI,Python/TypeScript,Python/TypeScript hybrid voice tools.,modalities
+voice-audio-ai,rust,Voice & Audio AI,Rust,Rust audio AI tools.,modalities
+voice-audio-ai,saas,Voice & Audio AI,SaaS,Hosted voice platforms.,modalities
+web-app-frameworks,saas,Web & App Frameworks,SaaS,Hosted web app platforms.,platform-infra
+web-app-frameworks,typescript,Web & App Frameworks,TypeScript,TypeScript web frameworks.,platform-infra
+web-scraping-automation,go,Web Scraping & Automation,Go,Go-based scraping tools.,platform-infra
+web-scraping-automation,javascript,Web Scraping & Automation,JavaScript,JavaScript scraping tools.,platform-infra
+web-scraping-automation,python,Web Scraping & Automation,Python,Python web scraping tools.,platform-infra
+web-scraping-automation,rust,Web Scraping & Automation,Rust,Rust web automation.,platform-infra
+web-scraping-automation,saas,Web Scraping & Automation,SaaS,Hosted scraping platforms.,platform-infra
+web-scraping-automation,typescript,Web Scraping & Automation,TypeScript,TypeScript browser automation.,platform-infra
+web-scraping-automation,various,Web Scraping & Automation,Various,Multi-language scraping tools.,platform-infra
+web-scraping-automation,zig,Web Scraping & Automation,Zig,Zig-based web automation.,platform-infra
